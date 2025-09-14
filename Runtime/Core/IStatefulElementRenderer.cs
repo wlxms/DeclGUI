@@ -12,7 +12,7 @@ namespace DeclGUI.Core
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">有状态元素</param>
         /// <param name="state">元素状态</param>
-        void Render(RenderManager mgr, in IStatefulElement element, object state);
+        void Render(RenderManager mgr, in IStatefulElement element, object state, in IDeclStyle style);
     }
 
     /// <summary>
@@ -27,6 +27,6 @@ namespace DeclGUI.Core
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">有状态元素</param>
         /// <param name="state">元素状态</param>
-        void Render(RenderManager mgr,in TElement element, TState state);
+        void Render(RenderManager mgr,in TElement element, TState state, in IDeclStyle style);
     }
 }

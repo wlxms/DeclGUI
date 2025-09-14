@@ -39,7 +39,7 @@ namespace DeclGUI.Core
         /// <summary>
         /// 解析样式（处理样式集引用）
         /// </summary>
-        public static IDeclStyle ResolveStyle(IDeclStyle style, ElementState elementState = null)
+        public static IDeclStyle ResolveStyle(IDeclStyle style, IElementState elementState = null)
         {
             if (style == null) return null;
             

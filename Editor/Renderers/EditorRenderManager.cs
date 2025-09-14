@@ -60,60 +60,63 @@ namespace DeclGUI.Editor.Renderers
         /// <param name="style">样式</param>
         /// <param name="defaultStyle">默认样式类型</param>
         /// <returns>应用样式后的GUI状态</returns>
-        public GUIStyle ApplyStyle(DeclStyle? style, GUIStyle defaultStyle = null)
+        public GUIStyle ApplyStyle(IDeclStyle style, GUIStyle defaultStyle = null)
         {
             if (style == null)
                 return defaultStyle ?? GUI.skin.label; // 默认返回标签样式
             
-            var declStyle = style.Value;
+            // 使用IDeclStyle接口的方法获取样式属性
+            var color = style.GetColor();
+            var backgroundColor = style.GetBackgroundColor();
+            var fontSize = style.GetFontSize();
+            var fontStyle = style.GetFontStyle();
+            var alignment = style.GetAlignment();
+            var padding = style.GetPadding();
+            var margin = style.GetMargin();
             
-            // 如果提供了GUIStyle，直接使用
-            if (declStyle.GUIStyle != null)
-                return declStyle.GUIStyle;
-            
-            // 否则创建一个新的GUIStyle并应用样式属性
+            // 创建一个新的GUIStyle并应用样式属性
             var guiStyle = new GUIStyle(defaultStyle ?? GUI.skin.label);
             
             // 应用所有样式属性
-            if (declStyle.Color != null)
+            if (color != null)
             {
-                guiStyle.normal.textColor = declStyle.Color.Value;
-                guiStyle.hover.textColor = declStyle.Color.Value;
-                guiStyle.active.textColor = declStyle.Color.Value;
-                guiStyle.focused.textColor = declStyle.Color.Value;
+                guiStyle.normal.textColor = color.Value;
+                guiStyle.hover.textColor = color.Value;
+                guiStyle.active.textColor = color.Value;
+                guiStyle.focused.textColor = color.Value;
             }
             
-            if (declStyle.BackgroundColor != null)
+            if (backgroundColor != null)
             {
-                guiStyle.normal.background = MakeTex(2, 2, declStyle.BackgroundColor.Value);
-                guiStyle.hover.background = MakeTex(2, 2, declStyle.BackgroundColor.Value);
-                guiStyle.active.background = MakeTex(2, 2, declStyle.BackgroundColor.Value);
-                guiStyle.focused.background = MakeTex(2, 2, declStyle.BackgroundColor.Value);
+                guiStyle.normal.background = MakeTex(2, 2, backgroundColor.Value);
+                guiStyle.hover.background = MakeTex(2, 2, backgroundColor.Value);
+                guiStyle.active.background = MakeTex(2, 2, backgroundColor.Value);
+                guiStyle.focused.background = MakeTex(2, 2, backgroundColor.Value);
             }
             
-            if (declStyle.FontSize != null && declStyle.FontSize > 0)
+            if (fontSize != null && fontSize > 0)
             {
-                guiStyle.fontSize = declStyle.FontSize.Value;
+                guiStyle.fontSize = fontSize.Value;
             }
             
-            if (declStyle.FontStyle != null && declStyle.FontStyle != FontStyle.Normal)
+            if (fontStyle != null && fontStyle != FontStyle.Normal)
             {
-                guiStyle.fontStyle = declStyle.FontStyle.Value;
+                guiStyle.fontStyle = fontStyle.Value;
             }
             
-            if (declStyle.Alignment != null && declStyle.Alignment != TextAnchor.UpperLeft)
+            if (alignment != null && alignment != TextAnchor.UpperLeft)
             {
-                guiStyle.alignment = declStyle.Alignment.Value;
+                guiStyle.alignment = alignment.Value;
             }
             
-            if (declStyle.Padding != null)
+            if (padding != null)
             {
-                guiStyle.padding = declStyle.Padding;
+                guiStyle.padding = padding;
             }
             
-            if (declStyle.Margin != null)
+            if (margin != null)
             {
-                guiStyle.margin = declStyle.Margin;
+                guiStyle.margin = margin;
             }
             
             return guiStyle;
@@ -124,9 +127,9 @@ namespace DeclGUI.Editor.Renderers
         /// </summary>
         /// <param name="style">样式</param>
         /// <returns>宽度值，如果没有设置则返回0</returns>
-        public float GetStyleWidth(DeclStyle? style)
+        public float GetStyleWidth(IDeclStyle style)
         {
-            return style?.Width ?? 0;
+            return style?.GetWidth() ?? 0;
         }
         
         /// <summary>
@@ -134,9 +137,9 @@ namespace DeclGUI.Editor.Renderers
         /// </summary>
         /// <param name="style">样式</param>
         /// <returns>高度值，如果没有设置则返回0</returns>
-        public float GetStyleHeight(DeclStyle? style)
+        public float GetStyleHeight(IDeclStyle style)
         {
-            return style?.Height ?? 0;
+            return style?.GetHeight() ?? 0;
         }
 
         /// <summary>
@@ -215,56 +218,7 @@ namespace DeclGUI.Editor.Renderers
             RenderFallbackStatic(exception, element);
         }
         
-        /// <summary>
-        /// 使用样式渲染元素（Editor环境实现）
-        /// </summary>
-        /// <param name="element">要渲染的元素</param>
-        /// <param name="style">应用的样式</param>
-        protected override void RenderElementWithStyle(IStylefulElement element, IDeclStyle style)
-        {
-            // 获取元素的渲染器
-            var renderer = GetRenderer(element);
-            
-            // 使用默认渲染（应用样式到GUI状态）
-            var declStyle = style as DeclStyle?;
-            if (declStyle != null)
-            {
-                // 保存当前GUI状态
-                var originalColor = GUI.color;
-                var originalBackgroundColor = GUI.backgroundColor;
-                var originalContentColor = GUI.contentColor;
-                
-                try
-                {
-                    // 应用样式属性到GUI状态
-                    if (declStyle.Value.Color != null)
-                    {
-                        GUI.color = declStyle.Value.Color.Value;
-                        GUI.contentColor = declStyle.Value.Color.Value;
-                    }
-                    
-                    if (declStyle.Value.BackgroundColor != null)
-                    {
-                        GUI.backgroundColor = declStyle.Value.BackgroundColor.Value;
-                    }
-                    
-                    // 使用默认渲染器渲染
-                    renderer.Render(this, element);
-                }
-                finally
-                {
-                    // 恢复GUI状态
-                    GUI.color = originalColor;
-                    GUI.backgroundColor = originalBackgroundColor;
-                    GUI.contentColor = originalContentColor;
-                }
-            }
-            else
-            {
-                // 如果没有有效样式，使用默认渲染
-                renderer.Render(this, element);
-            }
-        }
+
         
         /// <summary>
         /// 获取元素的屏幕区域

@@ -172,7 +172,7 @@ namespace DeclGUI.Core
                 FontStyle, Alignment, BorderWidth, BorderRadius);
         }
 
-        public IDeclStyle GetStyleForState(ElementState elementState)
+        public IDeclStyle GetStyleForState(IElementState elementState)
         {
             // 解析样式集引用
             if (!string.IsNullOrEmpty(StyleSetId))

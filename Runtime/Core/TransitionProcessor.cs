@@ -27,7 +27,7 @@ namespace DeclGUI.Core
         /// <summary>
         /// 处理样式过渡
         /// </summary>
-        public IDeclStyle ProcessTransition(IDeclStyle targetStyle, ElementState elementState, string elementKey)
+        public IDeclStyle ProcessTransition(IDeclStyle targetStyle, IElementState elementState, string elementKey)
         {
             if (targetStyle == null || elementState == null || string.IsNullOrEmpty(elementKey))
                 return targetStyle;
@@ -71,7 +71,7 @@ namespace DeclGUI.Core
             }
         }
         
-        private bool ShouldStartTransition(IDeclStyle targetStyle, ElementState elementState, string elementKey)
+        private bool ShouldStartTransition(IDeclStyle targetStyle, IElementState elementState, string elementKey)
         {
             // 检查样式是否有过渡配置
             // 检查元素状态是否发生变化
@@ -79,7 +79,7 @@ namespace DeclGUI.Core
             return true; // 简化实现
         }
         
-        private void StartTransition(IDeclStyle targetStyle, ElementState elementState, string elementKey)
+        private void StartTransition(IDeclStyle targetStyle, IElementState elementState, string elementKey)
         {
             // 创建新的过渡状态
             var transition = new TransitionState

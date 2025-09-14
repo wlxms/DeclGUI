@@ -17,7 +17,7 @@ namespace DeclGUI.Editor.Renderers
         /// </summary>
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">UI元素</param>
-        public override void Render(RenderManager mgr, in IElement element)
+        public override void Render(RenderManager mgr, in IElement element, in IDeclStyle styleParam)
         {
             // 检查ReadOnly上下文
             bool isReadOnly = false;
@@ -68,8 +68,9 @@ namespace DeclGUI.Editor.Renderers
                 if (editorMgr == null)
                     return;
                     
-                var guiStyle = editorMgr.ApplyStyle(style, EditorStyles.label);
-                var width = editorMgr.GetStyleWidth(style);
+                var currentStyle = styleParam ?? style;
+                var guiStyle = editorMgr.ApplyStyle(currentStyle, EditorStyles.label);
+                var width = editorMgr.GetStyleWidth(currentStyle);
                 
                 // 渲染对象选择器
                 var newValue = EditorGUILayout.ObjectField(
@@ -98,7 +99,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算ObjectField元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr, in IElement element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in IElement element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

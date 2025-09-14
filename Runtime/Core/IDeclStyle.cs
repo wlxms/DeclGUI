@@ -11,7 +11,7 @@ namespace DeclGUI.Core
         /// <summary>
         /// 根据元素状态获取对应的样式
         /// </summary>
-        IDeclStyle GetStyleForState(ElementState elementState);
+        IDeclStyle GetStyleForState(IElementState elementState);
         
         /// <summary>
         /// 合并另一个样式（返回新实例）

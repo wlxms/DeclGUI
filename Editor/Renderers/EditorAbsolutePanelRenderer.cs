@@ -10,15 +10,16 @@ namespace DeclGUI.Editor.Renderers
     /// </summary>
     public class EditorAbsolutePanelRenderer : EditorElementRenderer<AbsolutePanel>
     {
-        public override void Render(RenderManager mgr, in AbsolutePanel element)
+        public override void Render(RenderManager mgr, in AbsolutePanel element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
                 return;
 
-            var style = editorMgr.ApplyStyle(element.Style, null);
-            var width = editorMgr.GetStyleWidth(element.Style);
-            var height = editorMgr.GetStyleHeight(element.Style);
+            var currentStyle = styleParam ?? element.Style;
+            var style = editorMgr.ApplyStyle(currentStyle, null);
+            var width = editorMgr.GetStyleWidth(currentStyle);
+            var height = editorMgr.GetStyleHeight(currentStyle);
 
             // 保存当前GUI状态
             var matrix = GUI.matrix;
@@ -96,15 +97,16 @@ namespace DeclGUI.Editor.Renderers
             return size;
         }
 
-        public override Vector2 CalculateSize(RenderManager mgr, in AbsolutePanel element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in AbsolutePanel element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
                 return Vector2.zero;
 
-            var guiStyle = editorMgr.ApplyStyle(element.Style, null);
-            var width = editorMgr.GetStyleWidth(element.Style);
-            var height = editorMgr.GetStyleHeight(element.Style);
+            var currentStyle = style ?? element.Style;
+            var guiStyle = editorMgr.ApplyStyle(currentStyle, null);
+            var width = editorMgr.GetStyleWidth(currentStyle);
+            var height = editorMgr.GetStyleHeight(currentStyle);
 
             // 如果指定了固定尺寸，使用固定尺寸
             if (width > 0 && height > 0)

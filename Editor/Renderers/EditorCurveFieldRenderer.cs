@@ -15,7 +15,7 @@ namespace DeclGUI.Editor.Renderers
         /// </summary>
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">UI元素</param>
-        public override void Render(RenderManager mgr, in CurveField element)
+        public override void Render(RenderManager mgr, in CurveField element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -36,15 +36,15 @@ namespace DeclGUI.Editor.Renderers
 
             try
             {
-                var style = editorMgr.ApplyStyle(element.Style, EditorStyles.objectField);
-                var width = editorMgr.GetStyleWidth(element.Style);
+                var style = editorMgr.ApplyStyle(styleParam ?? element.Style, EditorStyles.objectField);
+                var width = editorMgr.GetStyleWidth(styleParam ?? element.Style);
 
                 // 渲染曲线编辑器
                 var newValue = EditorGUILayout.CurveField(
                     element.Value,
                     GUILayout.Width(width > 0 ? width : 150),
-                    GUILayout.Height(editorMgr.GetStyleHeight(element.Style) > 0 ?
-                        editorMgr.GetStyleHeight(element.Style) : 60)
+                    GUILayout.Height(editorMgr.GetStyleHeight(styleParam ?? element.Style) > 0 ?
+                        editorMgr.GetStyleHeight(styleParam ?? element.Style) : 60)
                 );
 
                 // 检查值是否变化并触发回调
@@ -63,7 +63,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算CurveField元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr, in CurveField element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in CurveField element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

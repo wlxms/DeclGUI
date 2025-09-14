@@ -13,7 +13,7 @@ namespace DeclGUI.Core
         /// </summary>
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">要渲染的元素</param>
-        void Render(RenderManager mgr, in IElement element);
+        void Render(RenderManager mgr, in IElement element, in IDeclStyle style);
 
         /// <summary>
         /// 计算元素的期望大小
@@ -22,7 +22,7 @@ namespace DeclGUI.Core
         /// <param name="element">要计算大小的元素</param>
         /// <param name="style">应用的样式</param>
         /// <returns>元素的期望大小</returns>
-        Vector2 CalculateSize(RenderManager mgr, in IElement element, in DeclStyle? style);
+        Vector2 CalculateSize(RenderManager mgr, in IElement element, in IDeclStyle style);
 
         /// <summary>
         /// 渲染元素时发生异常的回退方法
@@ -44,7 +44,7 @@ namespace DeclGUI.Core
         /// </summary>
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">要渲染的元素</param>
-        void Render(RenderManager mgr, in T element);
+        void Render(RenderManager mgr, in T element, in IDeclStyle style);
 
         /// <summary>
         /// 计算元素的期望大小
@@ -53,6 +53,6 @@ namespace DeclGUI.Core
         /// <param name="element">要计算大小的元素</param>
         /// <param name="style">应用的样式</param>
         /// <returns>元素的期望大小</returns>
-        Vector2 CalculateSize(RenderManager mgr, in T element, in DeclStyle? style);
+        Vector2 CalculateSize(RenderManager mgr, in T element, in IDeclStyle style);
     }
 }

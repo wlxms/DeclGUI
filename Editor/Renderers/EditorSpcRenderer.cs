@@ -9,7 +9,7 @@ namespace DeclGUI.Editor.Renderers
     /// </summary>
     public class EditorSpcRenderer : EditorElementRenderer<Spc>
     {
-        public override void Render(RenderManager mgr, in Spc element)
+        public override void Render(RenderManager mgr, in Spc element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -22,7 +22,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算Spc元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr, in Spc element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in Spc element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

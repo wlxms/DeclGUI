@@ -10,7 +10,26 @@ namespace DeclGUI.Editor.Renderers
     /// </summary>
     public class EditorLongPressButtonRenderer : EditorElementRenderer<LongPressButton, LongPressButtonState>
     {
-        public override void Render(RenderManager mgr, in LongPressButton element, LongPressButtonState state)
+        public override void Render(RenderManager mgr, in LongPressButton element, in IDeclStyle style)
+        {
+            // 对于无状态调用，尝试从状态管理器获取状态
+            if (!mgr.StateStack.IsEmpty())
+            {
+                // 将LongPressButton转换为IElementWithKey来获取状态
+                IElementWithKey elementWithKey = element;
+                var elementState = mgr.StateStack.CurrentStateManager.GetOrCreateState(elementWithKey);
+                if (elementState != null && elementState.State is LongPressButtonState buttonState)
+                {
+                    Render(mgr, element, buttonState, style);
+                    return;
+                }
+            }
+            
+            // 如果没有状态或状态栈为空，使用默认状态渲染
+            Render(mgr, element, new LongPressButtonState(), style);
+        }
+
+        public override void Render(RenderManager mgr, in LongPressButton element, LongPressButtonState state, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -122,7 +141,7 @@ namespace DeclGUI.Editor.Renderers
             }
         }
 
-        public override Vector2 CalculateSize(RenderManager mgr, in LongPressButton element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in LongPressButton element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

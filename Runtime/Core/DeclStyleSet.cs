@@ -14,7 +14,7 @@ namespace DeclGUI.Core
         
         public TransitionConfig? Transition { get; set; }
         
-        public IDeclStyle GetStyleForState(ElementState elementState)
+        public IDeclStyle GetStyleForState(IElementState elementState)
         {
             var pseudoClass = DeterminePseudoClass(elementState);
             
@@ -49,7 +49,7 @@ namespace DeclGUI.Core
         public float? GetBorderRadius() => null; // 需要具体状态
         public string GetStyleSetId() => null; // 样式集本身没有ID
         
-        private PseudoClass DeterminePseudoClass(ElementState elementState)
+        private PseudoClass DeterminePseudoClass(IElementState elementState)
         {
             if (elementState != null && elementState.HoverState.IsHovering)
                 return PseudoClass.Hover;

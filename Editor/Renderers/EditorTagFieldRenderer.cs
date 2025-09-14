@@ -15,7 +15,7 @@ namespace DeclGUI.Editor.Renderers
         /// </summary>
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">UI元素</param>
-        public override void Render(RenderManager mgr,in TagField element)
+        public override void Render(RenderManager mgr,in TagField element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -36,8 +36,8 @@ namespace DeclGUI.Editor.Renderers
 
             try
             {
-                var style = editorMgr.ApplyStyle(element.Style, EditorStyles.popup);
-                var width = editorMgr.GetStyleWidth(element.Style);
+                var style = editorMgr.ApplyStyle(styleParam ?? element.Style, EditorStyles.popup);
+                var width = editorMgr.GetStyleWidth(styleParam ?? element.Style);
 
                 // 渲染标签选择器
                 var newTag = EditorGUILayout.TagField(
@@ -62,7 +62,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算TagField元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr,in TagField element,in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr,in TagField element,in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

@@ -15,7 +15,7 @@ namespace DeclGUI.Editor.Renderers
         /// </summary>
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">UI元素</param>
-        public override void Render(RenderManager mgr,in Popup element)
+        public override void Render(RenderManager mgr,in Popup element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -36,8 +36,9 @@ namespace DeclGUI.Editor.Renderers
 
             try
             {
-                var style = editorMgr.ApplyStyle(element.Style, EditorStyles.popup);
-                var width = editorMgr.GetStyleWidth(element.Style);
+                var currentStyle = styleParam ?? element.Style;
+                var style = editorMgr.ApplyStyle(currentStyle, EditorStyles.popup);
+                var width = editorMgr.GetStyleWidth(currentStyle);
 
                 // 确保选项列表不为空
                 var options = element.Options ?? new string[0];
@@ -73,7 +74,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算Popup元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr,in Popup element,in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr,in Popup element,in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

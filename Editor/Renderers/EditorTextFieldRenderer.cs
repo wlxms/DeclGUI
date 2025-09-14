@@ -9,7 +9,7 @@ namespace DeclGUI.Editor.Renderers
     /// </summary>
     public class EditorTextFieldRenderer : EditorElementRenderer<TextField>
     {
-        public override void Render(RenderManager mgr,in TextField element)
+        public override void Render(RenderManager mgr,in TextField element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -28,9 +28,10 @@ namespace DeclGUI.Editor.Renderers
             // 在只读状态下禁用GUI
             GUI.enabled = !isReadOnly;
 
-            var style = editorMgr.ApplyStyle(element.Style, GUI.skin.textField);
-            var width = editorMgr.GetStyleWidth(element.Style);
-            var height = editorMgr.GetStyleHeight(element.Style);
+            var currentStyle = styleParam ?? element.Style;
+            var style = editorMgr.ApplyStyle(currentStyle, GUI.skin.textField);
+            var width = editorMgr.GetStyleWidth(currentStyle);
+            var height = editorMgr.GetStyleHeight(currentStyle);
 
             try
             {
@@ -72,7 +73,7 @@ namespace DeclGUI.Editor.Renderers
             }
         }
 
-        public override Vector2 CalculateSize(RenderManager mgr,in TextField element,in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr,in TextField element,in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

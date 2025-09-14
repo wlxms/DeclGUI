@@ -9,7 +9,7 @@ namespace DeclGUI.Editor.Renderers
     /// </summary>
     public class EditorFixableSpaceRenderer : EditorElementRenderer<FixableSpace>
     {
-        public override void Render(RenderManager mgr, in FixableSpace element)
+        public override void Render(RenderManager mgr, in FixableSpace element, in IDeclStyle styleParam)
         {
             // 创建一个可伸缩的空白区域
             GUILayout.FlexibleSpace();
@@ -18,7 +18,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算FixableSpace元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr, in FixableSpace element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in FixableSpace element, in IDeclStyle style)
         {
             // FixableSpace组件是可伸缩的，不占用固定空间
             return Vector2.zero;

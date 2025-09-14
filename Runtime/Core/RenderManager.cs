@@ -133,13 +133,6 @@ namespace DeclGUI.Core
             if (element == null)
                 return;
 
-            // 处理样式化元素
-            if (element is IStylefulElement stylefulElement)
-            {
-                RenderStylefulElement(stylefulElement);
-                return;
-            }
-
             // 根据元素类型处理不同的渲染逻辑
             if (element is IContextProvider contextProvider)
             {
@@ -306,16 +299,36 @@ namespace DeclGUI.Core
 
             try
             {
+                IElementState state = null;
                 // 统一渲染逻辑
                 if (element is IStatefulElement statefulElement)
                 {
-                    // 有状态元素：从栈顶获取状态
-                    RenderStatefulElement(statefulElement);
+                    if (!StateStack.IsEmpty())
+                    {
+                        // 使用状态栈的当前状态管理器
+                        state = StateStack.CurrentStateManager.GetOrCreateState(statefulElement);
+                    }
                 }
-                else
+
+                // 尝试使用渲染器渲染
+                if (TryRenderWithRenderer(element, state))
                 {
-                    // 普通元素：直接渲染
-                    RenderRegularElement(element);
+                    return;
+                }
+
+                try
+                {
+                    // 如果没有找到渲染器，调用元素的Render方法
+                    var renderTarget = element.Render();
+                    if (renderTarget != null && renderTarget != element)
+                    {
+                        RenderElement(renderTarget);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 如果没有渲染器，使用管理器的Fallback方法
+                    RenderFallback(ex, element);
                 }
             }
             finally
@@ -356,36 +369,34 @@ namespace DeclGUI.Core
         }
 
         /// <summary>
-        /// 渲染有状态元素
-        /// </summary>
-        private void RenderStatefulElement(IStatefulElement statefulElement)
-        {
-            if (!StateStack.IsEmpty())
-            {
-                // 使用状态栈的当前状态管理器
-                IElementState state = StateStack.CurrentStateManager.GetOrCreateState(statefulElement);
-                RenderElement(statefulElement, state.State);
-            }
-            else
-            {
-                Debug.LogError("State stack is empty when trying to render stateful element");
-            }
-        }
-
-        /// <summary>
         /// 尝试使用渲染器渲染元素
         /// </summary>
         /// <param name="element">要渲染的元素</param>
         /// <param name="state">状态参数（可选）</param>
         /// <returns>是否成功使用渲染器渲染</returns>
-        private bool TryRenderWithRenderer(IElement element, object state = null)
+        protected bool TryRenderWithRenderer(IElement element, IElementState elementState = null)
         {
             var elementType = element.GetType();
+
+            IDeclStyle style = null;
+
+            // 处理样式化元素
+            if (element is IStylefulElement stylefulElement && elementState != null)
+            {
+                // 解析样式（处理样式集引用）
+                IDeclStyle resolvedStyle = DeclThemeManager.ResolveStyle(stylefulElement.Style, elementState);
+
+                // 应用过渡效果
+                IDeclStyle finalStyle = TransitionProcessor.ProcessTransition(
+                    resolvedStyle, elementState, stylefulElement.Key);
+
+                style = finalStyle;
+            }
 
             // 首先尝试精确匹配
             if (_renderers.TryGetValue(elementType, out var renderer))
             {
-                return TryInvokeRenderer(renderer, element, state);
+                return TryInvokeRenderer(renderer, element, elementState?.State, style);
             }
 
             // 如果是泛型类型，尝试匹配泛型定义
@@ -394,7 +405,7 @@ namespace DeclGUI.Core
                 var genericDefinition = elementType.GetGenericTypeDefinition();
                 if (_renderers.TryGetValue(genericDefinition, out renderer))
                 {
-                    return TryInvokeRenderer(renderer, element, state);
+                    return TryInvokeRenderer(renderer, element, elementState?.State, style);
                 }
             }
 
@@ -404,7 +415,7 @@ namespace DeclGUI.Core
         /// <summary>
         /// 尝试调用渲染器
         /// </summary>
-        private bool TryInvokeRenderer(IElementRenderer renderer, IElement element, object state)
+        private bool TryInvokeRenderer(IElementRenderer renderer, IElement element, object state, IDeclStyle style)
         {
             try
             {
@@ -413,7 +424,7 @@ namespace DeclGUI.Core
                     // 有状态元素必须使用状态感知渲染器
                     if (renderer is IStatefulElementRenderer statefulRenderer)
                     {
-                        statefulRenderer.Render(this, element as IStatefulElement, state);
+                        statefulRenderer.Render(this, element as IStatefulElement, state, style);
                     }
                     else
                     {
@@ -424,7 +435,7 @@ namespace DeclGUI.Core
                 }
                 else
                 {
-                    renderer.Render(this, element);
+                    renderer.Render(this, element, style);
                 }
                 return true;
             }
@@ -442,7 +453,7 @@ namespace DeclGUI.Core
         private void RenderRegularElement(IElement element)
         {
             // 尝试使用渲染器渲染
-            if (TryRenderWithRenderer(element))
+            if (TryRenderWithRenderer(element, null))
             {
                 return;
             }
@@ -463,37 +474,37 @@ namespace DeclGUI.Core
             }
         }
 
-        /// <summary>
-        /// 渲染有状态元素（带状态参数）
-        /// </summary>
-        /// <param name="element">有状态元素</param>
-        /// <param name="state">元素状态</param>
-        public void RenderElement(in IStatefulElement element, object state)
-        {
-            if (element == null)
-                return;
+        // /// <summary>
+        // /// 渲染有状态元素（带状态参数）
+        // /// </summary>
+        // /// <param name="element">有状态元素</param>
+        // /// <param name="state">元素状态</param>
+        // public void RenderElement(in IStatefulElement element, object state)
+        // {
+        //     if (element == null)
+        //         return;
 
-            // 尝试使用渲染器渲染（带状态）
-            if (TryRenderWithRenderer(element, state))
-            {
-                return;
-            }
+        //     // 尝试使用渲染器渲染（带状态）
+        //     if (TryRenderWithRenderer(element, state))
+        //     {
+        //         return;
+        //     }
 
-            try
-            {
-                // 如果没有找到渲染器，调用元素的Render方法
-                var renderTarget = element.Render(state);
-                if (renderTarget != null && renderTarget != element)
-                {
-                    RenderElement(renderTarget);
-                }
-            }
-            catch (Exception ex)
-            {
-                // 如果没有渲染器，使用管理器的Fallback方法
-                RenderFallback(ex, element);
-            }
-        }
+        //     try
+        //     {
+        //         // 如果没有找到渲染器，调用元素的Render方法
+        //         var renderTarget = element.Render(state);
+        //         if (renderTarget != null && renderTarget != element)
+        //         {
+        //             RenderElement(renderTarget);
+        //         }
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         // 如果没有渲染器，使用管理器的Fallback方法
+        //         RenderFallback(ex, element);
+        //     }
+        // }
 
         /// <summary>
         /// 获取指定类型的渲染器
@@ -575,7 +586,7 @@ namespace DeclGUI.Core
         /// <param name="element">要计算大小的元素</param>
         /// <param name="parentStyle">父元素的样式（可选）</param>
         /// <returns>元素的期望大小</returns>
-        public Vector2 CalculateElementSize(IElement element, DeclStyle? parentStyle = null)
+        public Vector2 CalculateElementSize(IElement element, IDeclStyle parentStyle = null)
         {
             EnsureInitialized();
 
@@ -669,7 +680,7 @@ namespace DeclGUI.Core
         /// <param name="exception">发生的异常</param>
         /// <param name="element">发生异常的元素</param>
         protected abstract void RenderFallback(Exception exception, IElement element);
-        
+
         /// <summary>
         /// 更新过渡效果（每帧调用）
         /// </summary>
@@ -677,33 +688,5 @@ namespace DeclGUI.Core
         {
             TransitionProcessor.UpdateTransitions(deltaTime);
         }
-        
-        /// <summary>
-        /// 渲染具有样式的元素
-        /// </summary>
-        private void RenderStylefulElement(IStylefulElement element)
-        {
-            // 获取元素状态
-            ElementState elementState = null;
-            if (!StateStack.IsEmpty())
-            {
-                elementState = (ElementState)StateStack.CurrentStateManager.GetOrCreateState(element);
-            }
-            
-            // 解析样式（处理样式集引用）
-            IDeclStyle resolvedStyle = DeclThemeManager.ResolveStyle(element.Style, elementState);
-            
-            // 应用过渡效果
-            IDeclStyle finalStyle = TransitionProcessor.ProcessTransition(
-                resolvedStyle, elementState, element.Key);
-            
-            // 渲染元素
-            RenderElementWithStyle(element, finalStyle);
-        }
-        
-        /// <summary>
-        /// 使用样式渲染元素（抽象方法）
-        /// </summary>
-        protected abstract void RenderElementWithStyle(IStylefulElement element, IDeclStyle style);
     }
 }

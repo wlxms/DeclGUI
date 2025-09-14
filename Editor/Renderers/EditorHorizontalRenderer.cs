@@ -9,15 +9,16 @@ namespace DeclGUI.Editor.Renderers
     /// </summary>
     public class EditorHorizontalRenderer : EditorElementRenderer<Hor>
     {
-        public override void Render(RenderManager mgr, in Hor element)
+        public override void Render(RenderManager mgr, in Hor element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
                 return;
 
-            var style = editorMgr.ApplyStyle(element.Style, null);
-            var width = editorMgr.GetStyleWidth(element.Style);
-            var height = editorMgr.GetStyleHeight(element.Style);
+            var currentStyle = styleParam ?? element.Style;
+            var style = editorMgr.ApplyStyle(currentStyle, null);
+            var width = editorMgr.GetStyleWidth(currentStyle);
+            var height = editorMgr.GetStyleHeight(currentStyle);
 
             if (width > 0 && height > 0)
             {
@@ -55,7 +56,7 @@ namespace DeclGUI.Editor.Renderers
             return GUILayoutUtility.GetLastRect();
         }
     
-        public override Vector2 CalculateSize(RenderManager mgr, in Hor element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in Hor element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

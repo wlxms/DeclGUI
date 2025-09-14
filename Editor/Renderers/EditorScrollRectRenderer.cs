@@ -15,15 +15,15 @@ namespace DeclGUI.Editor.Renderers
         /// </summary>
         /// <param name="mgr">渲染管理器</param>
         /// <param name="element">UI元素</param>
-        public override void Render(RenderManager mgr,in ScrollRect element)
+        public override void Render(RenderManager mgr,in ScrollRect element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
                 return;
 
-            var style = editorMgr.ApplyStyle(element.Style, GUI.skin.scrollView);
-            var width = editorMgr.GetStyleWidth(element.Style);
-            var height = editorMgr.GetStyleHeight(element.Style);
+            var style = editorMgr.ApplyStyle(styleParam ?? element.Style, GUI.skin.scrollView);
+            var width = editorMgr.GetStyleWidth(styleParam ?? element.Style);
+            var height = editorMgr.GetStyleHeight(styleParam ?? element.Style);
 
             // 设置滚动条显示选项
             GUIStyle verticalScrollbar = element.AlwaysShowVertical ? GUI.skin.verticalScrollbar : GUIStyle.none;
@@ -56,7 +56,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算ScrollRect元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr,in ScrollRect element,in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr,in ScrollRect element,in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

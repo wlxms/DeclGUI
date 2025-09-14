@@ -8,8 +8,8 @@ namespace DeclGUI.Editor.Renderers
 {
     public abstract class EditorElementRenderer : IElementRenderer, IElementRectProvider
     {
-        public abstract Vector2 CalculateSize(RenderManager mgr, in IElement element, in DeclStyle? style);
-        public abstract void Render(RenderManager mgr, in IElement element);
+        public abstract Vector2 CalculateSize(RenderManager mgr, in IElement element, in IDeclStyle style);
+        public abstract void Render(RenderManager mgr, in IElement element, in IDeclStyle style);
         
         /// <summary>
         /// 获取元素的屏幕区域
@@ -78,16 +78,16 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 渲染元素
         /// </summary>
-        public abstract void Render(RenderManager mgr, in T element);
+        public abstract void Render(RenderManager mgr, in T element, in IDeclStyle style);
 
         /// <summary>
         /// 渲染元素（非泛型版本）
         /// </summary>
-        public override void Render(RenderManager mgr, in IElement element)
+        public override void Render(RenderManager mgr, in IElement element, in IDeclStyle style)
         {
             if (element is T typedElement)
             {
-                Render(mgr, typedElement);
+                Render(mgr, typedElement, style);
             }
         }
 
@@ -95,9 +95,9 @@ namespace DeclGUI.Editor.Renderers
         /// 计算元素的期望大小
         /// 默认实现使用GUILayout来测量元素大小
         /// </summary>
-        public abstract Vector2 CalculateSize(RenderManager mgr, in T element, in DeclStyle? style);
+        public abstract Vector2 CalculateSize(RenderManager mgr, in T element, in IDeclStyle style);
 
-        public override Vector2 CalculateSize(RenderManager mgr, in IElement element, in DeclStyle? style)
+        public override Vector2 CalculateSize(RenderManager mgr, in IElement element, in IDeclStyle style)
         {
             return CalculateSize(mgr, (T)element, style);
         }
@@ -115,23 +115,23 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 渲染有状态元素（类型安全版本）
         /// </summary>
-        public abstract void Render(RenderManager mgr, in TElement element, TState state);
+        public abstract void Render(RenderManager mgr, in TElement element, TState state, in IDeclStyle style);
 
         /// <summary>
         /// 渲染有状态元素（非泛型版本）
         /// </summary>
-        public void Render(RenderManager mgr, in IStatefulElement element, object state)
+        public void Render(RenderManager mgr, in IStatefulElement element, object state, in IDeclStyle style)
         {
             if (element is TElement typedElement && state is TState typedState)
             {
-                Render(mgr, typedElement, typedState);
+                Render(mgr, typedElement, typedState, style);
             }
         }
 
         /// <summary>
         /// 渲染元素（重写基类方法，禁止无状态调用）
         /// </summary>
-        public override void Render(RenderManager mgr, in TElement element)
+        public override void Render(RenderManager mgr, in TElement element, in IDeclStyle style)
         {
             throw new InvalidOperationException($"Stateful element {typeof(TElement).Name} requires state parameter. Use Render(RenderManager, TElement, TState) instead.");
         }
