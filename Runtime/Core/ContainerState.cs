@@ -46,6 +46,9 @@ namespace DeclGUI.Core
                 // 如果元素是有状态的，使用元素自己的状态
                 var elementState = statefulElement.CreateState();
                 newState.State = elementState;
+                
+                // 更新状态标志（确保状态同步）
+                newState.UpdateStateFlags();
             }
 
             _stateStorage[key] = newState;
@@ -59,11 +62,23 @@ namespace DeclGUI.Core
             if (_stateStorage.TryGetValue(key, out var existingState))
             {
                 existingState.State = state;
+                
+                // 更新状态标志（确保状态同步）
+                if (existingState is ElementState concreteState)
+                {
+                    concreteState.UpdateStateFlags();
+                }
             }
             else
             {
                 var newState = GetOrCreateState(element) as IElementState;
                 newState.State = state;
+                
+                // 更新状态标志（确保状态同步）
+                if (newState is ElementState concreteState)
+                {
+                    concreteState.UpdateStateFlags();
+                }
             }
             _stateLastUsedFrame[key] = _currentFrame;
         }

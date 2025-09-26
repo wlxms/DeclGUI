@@ -1,0 +1,205 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7c4a3a18546dff94a92ad0808b6f1c33, type: 3}
+  m_Name: SmallButton
+  m_EditorClassIdentifier: 
+  _baseStyle:
+    _styleSetId:
+      _value: 
+      _hasValue: 0
+    _color:
+      _valueType: 2
+      _directValue: {r: 0, g: 0, b: 0, a: 0}
+      _propertyRef: textColor
+    _width:
+      _valueType: 0
+      _directValue: 0
+      _propertyRef: 
+    _height:
+      _valueType: 2
+      _directValue: 0
+      _propertyRef: controlHeightSmall
+    _backgroundColor:
+      _valueType: 2
+      _directValue: {r: 0, g: 0, b: 0, a: 0}
+      _propertyRef: surfaceColor
+    _borderColor:
+      _valueType: 2
+      _directValue: {r: 0, g: 0, b: 0, a: 0}
+      _propertyRef: borderColor
+    _padding:
+      _valueType: 2
+      _directValue:
+        m_Left: 0
+        m_Right: 0
+        m_Top: 0
+        m_Bottom: 0
+      _propertyRef: paddingSmall
+    _margin:
+      _valueType: 0
+      _directValue:
+        m_Left: 0
+        m_Right: 0
+        m_Top: 0
+        m_Bottom: 0
+      _propertyRef: 
+    _fontSize:
+      _valueType: 2
+      _directValue: 0
+      _propertyRef: fontSizeSmall
+    _fontStyle:
+      _valueType: 1
+      _directValue: 0
+      _propertyRef: 
+    _alignment:
+      _valueType: 1
+      _directValue: 4
+      _propertyRef: 
+    _borderWidth:
+      _valueType: 2
+      _directValue: 0
+      _propertyRef: borderWidthNormal
+    _borderRadius:
+      _valueType: 2
+      _directValue: 0
+      _propertyRef: borderRadiusSmall
+  _styles:
+    _keys: 0100000002000000
+    _values:
+    - _styleSetId:
+        _value: 
+        _hasValue: 0
+      _color:
+        _valueType: 0
+        _directValue: {r: 0, g: 0, b: 0, a: 0}
+        _propertyRef: 
+      _width:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _height:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _backgroundColor:
+        _valueType: 2
+        _directValue: {r: 0, g: 0, b: 0, a: 0}
+        _propertyRef: hoverColor
+      _borderColor:
+        _valueType: 2
+        _directValue: {r: 0, g: 0, b: 0, a: 0}
+        _propertyRef: primaryColor
+      _padding:
+        _valueType: 0
+        _directValue:
+          m_Left: 0
+          m_Right: 0
+          m_Top: 0
+          m_Bottom: 0
+        _propertyRef: 
+      _margin:
+        _valueType: 0
+        _directValue:
+          m_Left: 0
+          m_Right: 0
+          m_Top: 0
+          m_Bottom: 0
+        _propertyRef: 
+      _fontSize:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _fontStyle:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _alignment:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _borderWidth:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _borderRadius:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+    - _styleSetId:
+        _value: 
+        _hasValue: 0
+      _color:
+        _valueType: 0
+        _directValue: {r: 0, g: 0, b: 0, a: 0}
+        _propertyRef: 
+      _width:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _height:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _backgroundColor:
+        _valueType: 2
+        _directValue: {r: 0, g: 0, b: 0, a: 0}
+        _propertyRef: activeColor
+      _borderColor:
+        _valueType: 2
+        _directValue: {r: 0, g: 0, b: 0, a: 0}
+        _propertyRef: primaryColor
+      _padding:
+        _valueType: 0
+        _directValue:
+          m_Left: 0
+          m_Right: 0
+          m_Top: 0
+          m_Bottom: 0
+        _propertyRef: 
+      _margin:
+        _valueType: 0
+        _directValue:
+          m_Left: 0
+          m_Right: 0
+          m_Top: 0
+          m_Bottom: 0
+        _propertyRef: 
+      _fontSize:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _fontStyle:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _alignment:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+      _borderWidth:
+        _valueType: 2
+        _directValue: 0
+        _propertyRef: borderWidthThick
+      _borderRadius:
+        _valueType: 0
+        _directValue: 0
+        _propertyRef: 
+  _hasTransition: 0
+  _serializedTransition:
+    Duration: 0
+    EasingCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    Properties: []

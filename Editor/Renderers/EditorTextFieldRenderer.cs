@@ -17,7 +17,7 @@ namespace DeclGUI.Editor.Renderers
 
             // 检查ReadOnly上下文
             bool isReadOnly = false;
-            if (mgr.ContextStack.TryGet<ReadOnly>(out var readOnlyContext))
+            if (mgr.ContextStack.TryGet<DisableContext>(out var readOnlyContext))
             {
                 isReadOnly = readOnlyContext.Value;
             }
@@ -32,6 +32,24 @@ namespace DeclGUI.Editor.Renderers
             var style = editorMgr.ApplyStyle(currentStyle, GUI.skin.textField);
             var width = editorMgr.GetStyleWidth(currentStyle);
             var height = editorMgr.GetStyleHeight(currentStyle);
+
+            // 保存原始颜色
+            var originalBackgroundColor = GUI.backgroundColor;
+            var originalColor = GUI.color;
+            var originalContentColor = GUI.contentColor;
+
+            // 应用样式颜色
+            if (currentStyle?.BackgroundColor != null)
+            {
+                GUI.backgroundColor = currentStyle.BackgroundColor.Value;
+            }
+            
+            if (currentStyle?.Color != null)
+            {
+                GUI.color = currentStyle.Color.Value;
+                // 同时设置contentColor以确保文字颜色正确
+                GUI.contentColor = currentStyle.Color.Value;
+            }
 
             try
             {
@@ -60,6 +78,11 @@ namespace DeclGUI.Editor.Renderers
             }
             finally
             {
+                // 恢复原始颜色
+                GUI.backgroundColor = originalBackgroundColor;
+                GUI.color = originalColor;
+                GUI.contentColor = originalContentColor;
+                
                 // 恢复原始GUI enabled状态
                 GUI.enabled = originalGUIEnabled;
             }

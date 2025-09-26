@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace DeclGUI.Core
@@ -5,6 +6,7 @@ namespace DeclGUI.Core
     /// <summary>
     /// 过渡效果配置
     /// </summary>
+    [Serializable]
     public struct TransitionConfig
     {
         public float Duration;          // 过渡持续时间（秒）

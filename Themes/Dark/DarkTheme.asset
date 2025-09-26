@@ -1,0 +1,783 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3bb2d5a10c5f6544c89809026f4bf8a0, type: 3}
+  m_Name: DarkTheme
+  m_EditorClassIdentifier: 
+  styleSets:
+  - Id: Button
+    StyleSet: {fileID: 11400000, guid: 64dc8f2dcbcf0674ebc09d26d1d65a46, type: 2}
+  - Id: Label
+    StyleSet: {fileID: 11400000, guid: 573a3fcd9cb6b2a459b87ea6fa2e2d3f, type: 2}
+  - Id: InputField
+    StyleSet: {fileID: 11400000, guid: 33e94ee1a91a07345912947909e5ca0a, type: 2}
+  - Id: Toggle
+    StyleSet: {fileID: 11400000, guid: dab50d0524037fc47b30a8f9910710d2, type: 2}
+  - Id: Slider
+    StyleSet: {fileID: 11400000, guid: b65007373f8220846be4fe2030a2053a, type: 2}
+  - Id: Scrollbar
+    StyleSet: {fileID: 11400000, guid: b3964dd52e780d240931e17f7d5e5309, type: 2}
+  - Id: Dropdown
+    StyleSet: {fileID: 11400000, guid: 454982eea352dd445a58480a39f5f174, type: 2}
+  - Id: ScrollView
+    StyleSet: {fileID: 11400000, guid: e261c7a7afcca95478bece6e3625a18f, type: 2}
+  - Id: Image
+    StyleSet: {fileID: 11400000, guid: 7164c5a85e50d074a91ae7e2c1b51745, type: 2}
+  - Id: Text
+    StyleSet: {fileID: 11400000, guid: a06c424c036778b48a1ababcf88d45ca, type: 2}
+  - Id: PrimaryButton
+    StyleSet: {fileID: 11400000, guid: ccda60c7539eea443ae3dfa655565080, type: 2}
+  - Id: SecondaryButton
+    StyleSet: {fileID: 11400000, guid: 6e08c2d903768224099b850238996006, type: 2}
+  - Id: TertiaryButton
+    StyleSet: {fileID: 11400000, guid: 122883d42e4401f49a2754efd6c2bece, type: 2}
+  - Id: SuccessButton
+    StyleSet: {fileID: 11400000, guid: c87b58fe60b9f5249ba7f0508cdb6fcb, type: 2}
+  - Id: WarningButton
+    StyleSet: {fileID: 11400000, guid: 68ee3c229589e3b4a892cc2b925bd70e, type: 2}
+  - Id: DangerButton
+    StyleSet: {fileID: 11400000, guid: 6073ba30a200e984c9eb46284a27e8b0, type: 2}
+  - Id: InfoButton
+    StyleSet: {fileID: 11400000, guid: 399073f7ae4bb9b4b9bae3405468247f, type: 2}
+  - Id: IconButton
+    StyleSet: {fileID: 11400000, guid: 10f7b2a17adfc8143aa4a11ad8eb74af, type: 2}
+  - Id: SmallButton
+    StyleSet: {fileID: 11400000, guid: 42a1df404a457e74fbaf8e0e13e4e87a, type: 2}
+  - Id: LargeButton
+    StyleSet: {fileID: 11400000, guid: bf4bd6855948dcd43b97b5c8735b8b6c, type: 2}
+  - Id: BorderedPanel
+    StyleSet: {fileID: 11400000, guid: b6c69ae8d8e5e8a4b998830deb6ade54, type: 2}
+  - Id: FilledPanel
+    StyleSet: {fileID: 11400000, guid: ac0466a1d25c3d24ba3af3aed8d0118f, type: 2}
+  - Id: SubtleTextField
+    StyleSet: {fileID: 11400000, guid: 422fb5f7f270a7a41a858c2fba03048b, type: 2}
+  - Id: BoldLabel
+    StyleSet: {fileID: 11400000, guid: a657f93459b4cfb45a04ca273caf14f0, type: 2}
+  - Id: HelpBoxText
+    StyleSet: {fileID: 11400000, guid: 7a902aabf95360e4aa705a25eaaffc50, type: 2}
+  - Id: FoldoutHeader
+    StyleSet: {fileID: 11400000, guid: 6fb64a8d065d39e42965192bec73d575, type: 2}
+  - Id: TreeViewItem
+    StyleSet: {fileID: 11400000, guid: 4abd3a55a44fc6b49842db9978e580ec, type: 2}
+  - Id: ListViewItem
+    StyleSet: {fileID: 11400000, guid: a650762773b07984f9314493ec34f52d, type: 2}
+  - Id: ToolbarSearchField
+    StyleSet: {fileID: 11400000, guid: 12333db2877ff2d4ab0cb25c3c4f5825, type: 2}
+  - Id: MiniLabel
+    StyleSet: {fileID: 11400000, guid: 6430ae7b75ee273448e56847bbc38c78, type: 2}
+  - Id: H1
+    StyleSet: {fileID: 11400000, guid: 87f8b641b7b512d4fb1b3fc48fb469a1, type: 2}
+  - Id: H2
+    StyleSet: {fileID: 11400000, guid: bcd6ca5c3fd8fdb4ea1992273b76ca1f, type: 2}
+  - Id: H3
+    StyleSet: {fileID: 11400000, guid: ae5d569a694e6fe4699ffae1d6aaa858, type: 2}
+  - Id: H4
+    StyleSet: {fileID: 11400000, guid: 3a2dc10d04b145a4eb6ea73c1bcf4e33, type: 2}
+  - Id: H5
+    StyleSet: {fileID: 11400000, guid: 30bca67d6bae5c44cb5a1f20b26ad9f3, type: 2}
+  - Id: H6
+    StyleSet: {fileID: 11400000, guid: 619b0a3c18151fa42968a57368138196, type: 2}
+  - Id: Paragraph
+    StyleSet: {fileID: 11400000, guid: a10f955c8a1c2bc45a3111d2bd8b4bfa, type: 2}
+  - Id: Link
+    StyleSet: {fileID: 11400000, guid: 5d2a635b2ce3bb24186c55fb0a97ea45, type: 2}
+  - Id: Code
+    StyleSet: {fileID: 11400000, guid: 3f7cd38c69807f6498305788f2382e69, type: 2}
+  - Id: Quote
+    StyleSet: {fileID: 11400000, guid: 6205fbb1308bd6f49a1572e414e34003, type: 2}
+  themeProperties:
+  - Name: backgroundColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.12, g: 0.12, b: 0.12, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: surfaceColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.18, g: 0.18, b: 0.18, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: primaryColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0.6, b: 1, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: secondaryColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: textColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.9, g: 0.9, b: 0.9, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: textSecondaryColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.6, g: 0.6, b: 0.6, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: borderColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.3, g: 0.3, b: 0.3, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: hoverColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.25, g: 0.25, b: 0.25, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: activeColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.35, g: 0.35, b: 0.35, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: focusColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.2, g: 0.4, b: 0.6, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: disabledColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.4, g: 0.4, b: 0.4, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: successColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.3, g: 0.8, b: 0.4, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: warningColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 1, g: 0.9, b: 0.3, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: errorColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 1, g: 0.4, b: 0.4, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: infoColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.3, g: 0.7, b: 1, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: fontSizeSmall
+    Type: 1
+    FloatValue: 0
+    IntValue: 10
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: fontSizeNormal
+    Type: 1
+    FloatValue: 0
+    IntValue: 12
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: fontSizeLarge
+    Type: 1
+    FloatValue: 0
+    IntValue: 14
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: fontSizeXLarge
+    Type: 1
+    FloatValue: 0
+    IntValue: 16
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: fontSizeXXLarge
+    Type: 1
+    FloatValue: 0
+    IntValue: 18
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: fontSizeXXXLarge
+    Type: 1
+    FloatValue: 0
+    IntValue: 24
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: paddingSmall
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 4
+      m_Right: 4
+      m_Top: 4
+      m_Bottom: 4
+  - Name: paddingNormal
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 8
+      m_Right: 8
+      m_Top: 8
+      m_Bottom: 8
+  - Name: paddingLarge
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 12
+      m_Right: 12
+      m_Top: 12
+      m_Bottom: 12
+  - Name: marginSmall
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 2
+      m_Right: 2
+      m_Top: 2
+      m_Bottom: 2
+  - Name: marginNormal
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 4
+      m_Right: 4
+      m_Top: 4
+      m_Bottom: 4
+  - Name: marginLarge
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 8
+      m_Right: 8
+      m_Top: 8
+      m_Bottom: 8
+  - Name: paddingHeading
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 4
+      m_Bottom: 4
+  - Name: marginHeading
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 8
+      m_Bottom: 4
+  - Name: paddingParagraph
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 2
+      m_Bottom: 2
+  - Name: marginParagraph
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 4
+      m_Bottom: 4
+  - Name: marginQuote
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 8
+      m_Right: 0
+      m_Top: 4
+      m_Bottom: 4
+  - Name: borderWidthNormal
+    Type: 0
+    FloatValue: 1
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: borderWidthThick
+    Type: 0
+    FloatValue: 2
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: borderRadiusSmall
+    Type: 0
+    FloatValue: 2
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: borderRadiusNormal
+    Type: 0
+    FloatValue: 4
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: borderRadiusLarge
+    Type: 0
+    FloatValue: 8
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: controlHeightSmall
+    Type: 0
+    FloatValue: 20
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: controlHeightNormal
+    Type: 0
+    FloatValue: 24
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: controlHeightLarge
+    Type: 0
+    FloatValue: 32
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: linkColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0.6, b: 1, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: linkHoverColor
+    Type: 2
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0.8, g: 0.8, b: 0.8, a: 1}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 0
+      m_Right: 0
+      m_Top: 0
+      m_Bottom: 0
+  - Name: buttonPadding
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 8
+      m_Right: 8
+      m_Top: 4
+      m_Bottom: 4
+  - Name: smallButtonPadding
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 4
+      m_Right: 4
+      m_Top: 2
+      m_Bottom: 2
+  - Name: largeButtonPadding
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 12
+      m_Right: 12
+      m_Top: 6
+      m_Bottom: 6
+  - Name: panelPadding
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 8
+      m_Right: 8
+      m_Top: 8
+      m_Bottom: 8
+  - Name: textFieldPadding
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 6
+      m_Right: 6
+      m_Top: 4
+      m_Bottom: 4
+  - Name: subtleTextFieldPadding
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 4
+      m_Right: 4
+      m_Top: 3
+      m_Bottom: 3
+  - Name: labelPadding
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
+      m_Left: 2
+      m_Right: 2
+      m_Top: 1
+      m_Bottom: 1
+  propertyTemplate: {fileID: 11400000, guid: d68c7e96d2d0cb94ca52a1c20ff79818, type: 2}

@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 namespace DeclGUI.Core
@@ -9,122 +9,114 @@ namespace DeclGUI.Core
     /// </summary>
     public class TransitionProcessor
     {
-        private class TransitionState
-        {
-            public IDeclStyle FromStyle { get; set; }
-            public IDeclStyle ToStyle { get; set; }
-            public float StartTime { get; set; }
-            public float Duration { get; set; }
-            public AnimationCurve EasingCurve { get; set; }
-            public string[] Properties { get; set; }
-        }
-        
-        private readonly Dictionary<string, TransitionState> _activeTransitions = 
-            new Dictionary<string, TransitionState>();
-        
-        private float _currentTime;
-        
         /// <summary>
         /// 处理样式过渡
         /// </summary>
-        public IDeclStyle ProcessTransition(IDeclStyle targetStyle, IElementState elementState, string elementKey)
+        /// <param name="fromStyle">起始样式</param>
+        /// <param name="toStyle">目标样式</param>
+        /// <param name="elementState">元素状态（包含过渡状态）</param>
+        /// <param name="transitionConfig">过渡配置</param>
+        /// <returns>当前过渡样式</returns>
+        public IDeclStyle ProcessTransition(IDeclStyle fromStyle, IDeclStyle toStyle, IElementState elementState, TransitionConfig? transitionConfig = null)
         {
-            if (targetStyle == null || elementState == null || string.IsNullOrEmpty(elementKey))
-                return targetStyle;
+            if (fromStyle == null || toStyle == null || elementState == null)
+                return toStyle;
+
+            // 如果没有过渡配置或样式相同，直接返回目标样式
+            if (!transitionConfig.HasValue || fromStyle == toStyle)
+                return toStyle;
+
+            var config = transitionConfig.Value;
             
             // 检查是否需要开始新过渡
-            if (ShouldStartTransition(targetStyle, elementState, elementKey))
+            if (ShouldStartTransition(fromStyle, toStyle, elementState, config))
             {
-                StartTransition(targetStyle, elementState, elementKey);
+                StartTransition(fromStyle, toStyle, elementState, config);
             }
-            
-            // 获取当前过渡状态
-            if (_activeTransitions.TryGetValue(elementKey, out var transition))
-            {
-                return GetCurrentTransitionStyle(transition);
-            }
-            
-            return targetStyle;
+
+            // 获取当前过渡样式
+            return GetCurrentTransitionStyle(elementState.TransitionState);
         }
-        
+
         /// <summary>
-        /// 更新所有活跃的过渡
+        /// 检查是否需要开始新过渡
         /// </summary>
-        public void UpdateTransitions(float deltaTime)
+        private bool ShouldStartTransition(IDeclStyle fromStyle, IDeclStyle toStyle, IElementState elementState, TransitionConfig config)
         {
-            _currentTime += deltaTime;
+            var transitionState = elementState.TransitionState;
             
-            // 清理完成的过渡
-            var keysToRemove = new List<string>();
-            foreach (var kvp in _activeTransitions)
-            {
-                var transition = kvp.Value;
-                if (_currentTime - transition.StartTime >= transition.Duration)
-                {
-                    keysToRemove.Add(kvp.Key);
-                }
-            }
-            
-            foreach (var key in keysToRemove)
-            {
-                _activeTransitions.Remove(key);
-            }
+            // 如果没有活跃过渡，需要开始
+            if (transitionState.FromStyle == null || transitionState.ToStyle == null)
+                return true;
+
+            // 如果目标样式发生变化，需要重新开始过渡
+            if (transitionState.ToStyle != toStyle)
+                return true;
+
+            // 如果过渡已完成，需要重新开始
+            if (transitionState.IsCompleted)
+                return true;
+
+            return false;
         }
-        
-        private bool ShouldStartTransition(IDeclStyle targetStyle, IElementState elementState, string elementKey)
+
+        /// <summary>
+        /// 开始新过渡
+        /// </summary>
+        private void StartTransition(IDeclStyle fromStyle, IDeclStyle toStyle, IElementState elementState, TransitionConfig config)
         {
-            // 检查样式是否有过渡配置
-            // 检查元素状态是否发生变化
-            // 这里需要具体实现状态变化检测逻辑
-            return true; // 简化实现
-        }
-        
-        private void StartTransition(IDeclStyle targetStyle, IElementState elementState, string elementKey)
-        {
-            // 创建新的过渡状态
-            var transition = new TransitionState
+            elementState.TransitionState = new TransitionState
             {
-                FromStyle = GetCurrentStyle(elementKey), // 需要实现当前样式获取
-                ToStyle = targetStyle,
-                StartTime = _currentTime,
-                Duration = 0.3f, // 从配置获取
-                EasingCurve = AnimationCurve.EaseInOut(0, 0, 1, 1), // 默认缓动曲线
-                Properties = new[] { "color", "width", "height" } // 从配置获取
+                FromStyle = fromStyle,
+                ToStyle = toStyle,
+                StartTime = Time.time,
+                Duration = config.Duration,
+                EasingCurve = config.EasingCurve ?? AnimationCurve.EaseInOut(0, 0, 1, 1),
+                Properties = config.Properties ?? new[] { "color", "width", "height" }
             };
-            
-            _activeTransitions[elementKey] = transition;
         }
-        
-        private IDeclStyle GetCurrentTransitionStyle(TransitionState transition)
+
+        /// <summary>
+        /// 获取当前过渡样式
+        /// </summary>
+        private IDeclStyle GetCurrentTransitionStyle(TransitionState transitionState)
         {
-            float progress = Mathf.Clamp01((_currentTime - transition.StartTime) / transition.Duration);
-            float easedProgress = transition.EasingCurve.Evaluate(progress);
+            if (transitionState == null || transitionState.FromStyle == null || transitionState.ToStyle == null)
+                return new DeclStyle();
+
+            if (transitionState.IsCompleted)
+                return transitionState.ToStyle;
+
+            float progress = transitionState.EasedProgress;
             
-            return InterpolateStyles(transition.FromStyle, transition.ToStyle, easedProgress);
+            return InterpolateStyles(transitionState.FromStyle, transitionState.ToStyle, progress);
         }
-        
+
+        /// <summary>
+        /// 样式插值
+        /// </summary>
         private IDeclStyle InterpolateStyles(IDeclStyle from, IDeclStyle to, float progress)
         {
             // 颜色插值
-            Color? color = InterpolateColor(from.GetColor(), to.GetColor(), progress);
-            Color? backgroundColor = InterpolateColor(from.GetBackgroundColor(), to.GetBackgroundColor(), progress);
-            Color? borderColor = InterpolateColor(from.GetBorderColor(), to.GetBorderColor(), progress);
-            
+            Color? color = InterpolateColor(from.Color, to.Color, progress);
+            Color? backgroundColor = InterpolateColor(from.BackgroundColor, to.BackgroundColor, progress);
+            Color? borderColor = InterpolateColor(from.BorderColor, to.BorderColor, progress);
+
             // 尺寸插值
-            float width = Mathf.Lerp(from.GetWidth(), to.GetWidth(), progress);
-            float height = Mathf.Lerp(from.GetHeight(), to.GetHeight(), progress);
-            float borderWidth = Mathf.Lerp(from.GetBorderWidth() ?? 0, to.GetBorderWidth() ?? 0, progress);
-            float borderRadius = Mathf.Lerp(from.GetBorderRadius() ?? 0, to.GetBorderRadius() ?? 0, progress);
-            
+            float width = Mathf.Lerp(from.Width ?? 0, to.Width ?? 0, progress);
+            float height = Mathf.Lerp(from.Height ?? 0, to.Height ?? 0, progress);
+            float borderWidth = Mathf.Lerp(from.BorderWidth ?? 0, to.BorderWidth ?? 0, progress);
+            float borderRadius = Mathf.Lerp(from.BorderRadius ?? 0, to.BorderRadius ?? 0, progress);
+
             // 布局属性插值
-            RectOffset padding = InterpolateRectOffset(from.GetPadding(), to.GetPadding(), progress);
-            RectOffset margin = InterpolateRectOffset(from.GetMargin(), to.GetMargin(), progress);
-            
+            RectOffset padding = InterpolateRectOffset(from.Padding ?? new RectOffset(), to.Padding ?? new RectOffset(), progress);
+            RectOffset margin = InterpolateRectOffset(from.Margin ?? new RectOffset(), to.Margin ?? new RectOffset(), progress);
+
             // 文本属性（离散值，不插值）
-            int? fontSize = progress >= 0.5f ? to.GetFontSize() : from.GetFontSize();
-            FontStyle? fontStyle = progress >= 0.5f ? to.GetFontStyle() : from.GetFontStyle();
-            TextAnchor? alignment = progress >= 0.5f ? to.GetAlignment() : from.GetAlignment();
-            
+            int? fontSize = progress >= 0.5f ? to.FontSize : from.FontSize;
+            FontStyle? fontStyle = progress >= 0.5f ? to.FontStyle : from.FontStyle;
+            TextAnchor? alignment = progress >= 0.5f ? to.Alignment : from.Alignment;
+
             return new DeclStyle(
                 color: color,
                 width: width,
@@ -140,7 +132,10 @@ namespace DeclGUI.Core
                 borderRadius: borderRadius
             );
         }
-        
+
+        /// <summary>
+        /// 颜色插值
+        /// </summary>
         private Color? InterpolateColor(Color? from, Color? to, float progress)
         {
             if (!from.HasValue && !to.HasValue) return null;
@@ -149,7 +144,10 @@ namespace DeclGUI.Core
             
             return Color.Lerp(from.Value, to.Value, progress);
         }
-        
+
+        /// <summary>
+        /// 矩形偏移插值
+        /// </summary>
         private RectOffset InterpolateRectOffset(RectOffset from, RectOffset to, float progress)
         {
             return new RectOffset(
@@ -158,13 +156,6 @@ namespace DeclGUI.Core
                 Mathf.RoundToInt(Mathf.Lerp(from.top, to.top, progress)),
                 Mathf.RoundToInt(Mathf.Lerp(from.bottom, to.bottom, progress))
             );
-        }
-        
-        private IDeclStyle GetCurrentStyle(string elementKey)
-        {
-            // 需要实现当前样式获取逻辑
-            // 可以从渲染管理器或元素状态获取
-            return new DeclStyle();
         }
     }
 }

@@ -13,6 +13,8 @@ namespace DeclGUI.Core
         HoverExit,   // 悬停退出
         Drag,        // 拖拽事件
         Scroll,      // 滚动事件
+        Focus,       // 聚焦事件
+        Blur,        // 失焦事件
         Custom       // 自定义事件
     }
 }

@@ -23,7 +23,7 @@ namespace DeclGUI.Editor.Renderers
 
             // 检查ReadOnly上下文
             bool isReadOnly = false;
-            if (mgr.ContextStack.TryGet<ReadOnly>(out var readOnlyContext))
+            if (mgr.ContextStack.TryGet<DisableContext>(out var readOnlyContext))
             {
                 isReadOnly = readOnlyContext.Value;
             }
