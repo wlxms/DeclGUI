@@ -8,12 +8,12 @@ namespace DeclGUI.Core
     /// 只读上下文
     /// 用于控制子元素的只读状态
     /// </summary>
-    public struct ReadOnly : IContextProvider
+    public struct DisableContext : IContextProvider
     {
         public bool Value { get; }
         public IElement Child { get; private set; }
 
-        public ReadOnly(bool value, IElement child = null)
+        public DisableContext(bool value, IElement child = null)
         {
             Value = value;
             Child = child;

@@ -28,7 +28,7 @@ namespace DeclGUI.Editor.Examples
             _renderManager ??= new EditorRenderManager();
 
             // 使用ContextBatch提供多个上下文
-            var ui = new ContextBatch(new ReadOnly(_isReadOnly), new UserName(_userName)) {
+            var ui = new ContextBatch(new DisableContext(_isReadOnly), new UserName(_userName)) {
                 BuildUI()
             };
 
@@ -68,7 +68,7 @@ namespace DeclGUI.Editor.Examples
                 
                 // 消费ReadOnly和UserName上下文
                 new ContextConsumer(context => {
-                    bool isReadOnly = context.Get<ReadOnly>().Value;
+                    bool isReadOnly = context.Get<DisableContext>().Value;
                     string userName = context.Get<UserName>().Value;
                     
                     return new Ver {
@@ -92,10 +92,10 @@ namespace DeclGUI.Editor.Examples
                 new Spc(10),
                 
                 // 外层上下文 - 只读模式
-                new ReadOnly(true) {
+                new DisableContext(true) {
                     new UserName("Admin") {
                         new ContextConsumer(innerContext => {
-                            bool outerReadOnly = innerContext.Get<ReadOnly>().Value;
+                            bool outerReadOnly = innerContext.Get<DisableContext>().Value;
                             string innerUserName = innerContext.Get<UserName>().Value;
                             
                             return new Ver {

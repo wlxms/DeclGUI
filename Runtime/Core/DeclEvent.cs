@@ -15,6 +15,8 @@ namespace DeclGUI.Core
         public Action OnHoverExit;
         public Action OnDrag;
         public Action OnScroll;
+        public Action OnFocus;
+        public Action OnBlur;
         
         /// <summary>
         /// 获取指定事件类型的处理程序
@@ -30,6 +32,8 @@ namespace DeclGUI.Core
                 DeclEventType.HoverExit => OnHoverExit,
                 DeclEventType.Drag => OnDrag,
                 DeclEventType.Scroll => OnScroll,
+                DeclEventType.Focus => OnFocus,
+                DeclEventType.Blur => OnBlur,
                 _ => null
             };
         }
@@ -62,6 +66,12 @@ namespace DeclGUI.Core
                 case DeclEventType.Scroll:
                     OnScroll = handler;
                     break;
+                case DeclEventType.Focus:
+                    OnFocus = handler;
+                    break;
+                case DeclEventType.Blur:
+                    OnBlur = handler;
+                    break;
             }
         }
         
@@ -77,6 +87,8 @@ namespace DeclGUI.Core
             OnHoverExit = null;
             OnDrag = null;
             OnScroll = null;
+            OnFocus = null;
+            OnBlur = null;
         }
     }
 }

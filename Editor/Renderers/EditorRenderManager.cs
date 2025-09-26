@@ -4,14 +4,209 @@ using UnityEngine;
 using DeclGUI.Editor.Renderers;
 using System;
 using UnityEditor;
+using System.Collections.Generic;
 
 namespace DeclGUI.Editor.Renderers
 {
+    /// <summary>
+    /// GUIStyle对象池，用于重用GUIStyle实例以减少GC
+    /// </summary>
+    internal class GUIStylePool
+    {
+        private Dictionary<(int styleHashCode, string defaultStyleName), GUIStyle> _stylePool = new Dictionary<(int styleHashCode, string defaultStyleName), GUIStyle>();
+        private Dictionary<int, Texture2D> _texturePool = new Dictionary<int, Texture2D>(); // 纹理缓存池
+        private List<GUIStyle> _availableStyles = new List<GUIStyle>(); // 可用的GUIStyle对象池
+        
+        /// <summary>
+        /// 获取或创建GUIStyle实例
+        /// </summary>
+        public GUIStyle GetOrCreateStyle((int styleHashCode, string defaultStyleName) key, GUIStyle defaultStyle)
+        {
+            // 首先尝试从池中获取
+            if (_stylePool.TryGetValue(key, out GUIStyle existingStyle))
+            {
+                return existingStyle;
+            }
+            
+            // 如果没有找到，创建新的GUIStyle
+            GUIStyle newStyle = CreateNewStyle(defaultStyle);
+            _stylePool[key] = newStyle;
+            return newStyle;
+        }
+        
+        public GUIStyle GetExistedStyle((int styleHashCode, string defaultStyleName) key)
+        {
+            return _stylePool.TryGetValue(key, out GUIStyle existingStyle) ? existingStyle : null;
+        }
+
+        public GUIStyle GetPoolStyle((int styleHashCode, string defaultStyleName) key, GUIStyle defaultStyle)
+        { 
+            // 如果没有找到，创建新的GUIStyle
+            GUIStyle newStyle = CreateNewStyle(defaultStyle);
+            _stylePool[key] = newStyle;
+            return newStyle;
+        }
+        
+        /// <summary>
+        /// 纹理缓存键，包含颜色、边框宽度和圆角信息
+        /// </summary>
+        private struct TextureCacheKey : IEquatable<TextureCacheKey>
+        {
+            public int ColorHash;
+            public int? BorderWidth;
+            public int? BorderRadius;
+
+            public TextureCacheKey(Color color, int? borderWidth, int? borderRadius)
+            {
+                ColorHash = color.GetHashCode();
+                BorderWidth = borderWidth;
+                BorderRadius = borderRadius;
+            }
+
+            public bool Equals(TextureCacheKey other)
+            {
+                return ColorHash == other.ColorHash
+                    && BorderWidth == other.BorderWidth
+                    && BorderRadius == other.BorderRadius;
+            }
+
+            public override bool Equals(object obj)
+            {
+                return obj is TextureCacheKey other && Equals(other);
+            }
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int hash = 17;
+                    hash = hash * 23 + ColorHash;
+                    hash = hash * 23 + BorderWidth.GetHashCode();
+                    hash = hash * 23 + BorderRadius.GetHashCode();
+                    return hash;
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 获取或创建颜色纹理
+        /// </summary>
+        public Texture2D GetOrCreateColorTexture(Color color, int? borderWidth = null, int? borderRadius = null)
+        {
+            // 使用颜色、边框宽度和圆角的组合哈希值作为键
+            var key = new TextureCacheKey(color, borderWidth, borderRadius);
+            
+            if (_texturePool.TryGetValue(key.GetHashCode(), out Texture2D existingTexture))
+            {
+                return existingTexture;
+            }
+            
+            // 创建新的纹理
+            Texture2D newTexture = CreateColorTexture(color, borderWidth, borderRadius);
+            _texturePool[key.GetHashCode()] = newTexture;
+            return newTexture;
+        }
+        
+        /// <summary>
+        /// 创建颜色纹理
+        /// </summary>
+        private Texture2D CreateColorTexture(Color color, int? borderWidth, int? borderRadius)
+        {
+            // 创建纹理，边框宽度和圆角主要通过GUIStyle的border属性控制
+            // 但我们仍然为不同的参数组合创建不同的纹理以确保一致性
+            var texture = new Texture2D(2, 2);
+            Color[] pixels = new Color[4];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels[i] = color;
+            }
+            texture.SetPixels(pixels);
+            texture.Apply();
+            return texture;
+        }
+        
+        /// <summary>
+        /// 创建新的GUIStyle实例
+        /// </summary>
+        private GUIStyle CreateNewStyle(GUIStyle defaultStyle)
+        {
+            // 从可用池中获取或创建新实例
+            GUIStyle style;
+            if (_availableStyles.Count > 0)
+            {
+                style = _availableStyles[_availableStyles.Count - 1];
+                _availableStyles.RemoveAt(_availableStyles.Count - 1);
+                // 重置样式属性
+                style.normal = defaultStyle.normal;
+                style.hover = defaultStyle.hover;
+                style.active = defaultStyle.active;
+                style.focused = defaultStyle.focused;
+                style.onNormal = defaultStyle.onNormal;
+                style.onHover = defaultStyle.onHover;
+                style.onActive = defaultStyle.onActive;
+                style.onFocused = defaultStyle.onFocused;
+                style.border = defaultStyle.border;
+                style.margin = defaultStyle.margin;
+                style.padding = defaultStyle.padding;
+                style.overflow = defaultStyle.overflow;
+                style.font = defaultStyle.font;
+                style.fontSize = defaultStyle.fontSize;
+                style.fontStyle = defaultStyle.fontStyle;
+                style.alignment = defaultStyle.alignment;
+                style.wordWrap = defaultStyle.wordWrap;
+                style.clipping = defaultStyle.clipping;
+                style.imagePosition = defaultStyle.imagePosition;
+                style.contentOffset = defaultStyle.contentOffset;
+                style.fixedWidth = defaultStyle.fixedWidth;
+                style.fixedHeight = defaultStyle.fixedHeight;
+                style.stretchWidth = defaultStyle.stretchWidth;
+                style.stretchHeight = defaultStyle.stretchHeight;
+            }
+            else
+            {
+                style = new GUIStyle(defaultStyle);
+            }
+            
+            return style;
+        }
+        
+        /// <summary>
+        /// 清理对象池（保留GUIStyle实例以供重用，仅重置映射）
+        /// </summary>
+        public void Clear()
+        {
+            _stylePool.Clear();
+            // 注意：不清理纹理池，因为纹理可以被多个样式共享
+        }
+        
+        /// <summary>
+        /// 释放所有资源（在适当的时候调用，如场景切换）
+        /// </summary>
+        public void Dispose()
+        {
+            _stylePool.Clear();
+            // 销毁纹理资源
+            foreach (var texture in _texturePool.Values)
+            {
+                if (texture != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(texture);
+                }
+            }
+            _texturePool.Clear();
+            _availableStyles.Clear();
+        }
+    }
+
+
     /// <summary>
     /// Editor环境渲染管理器
     /// </summary>
     public class EditorRenderManager : RenderManager
     {
+        // GUIStyle对象池 - 重用GUIStyle对象以减少GC
+        private GUIStylePool _guiStylePool = new GUIStylePool();
+
         /// <summary>
         /// 发现和注册Editor专用的渲染器
         /// </summary>
@@ -52,6 +247,9 @@ namespace DeclGUI.Editor.Renderers
             // 注册有状态组件渲染器
             RegisterRenderer<StatefulButton>(new EditorStatefulButtonRenderer());
             RegisterRenderer<LongPressButton>(new EditorLongPressButtonRenderer());
+            
+            // 注册DisableGroup渲染器
+            RegisterRenderer<DisableGroup>(new DisableGroupRenderer());
         }
         
         /// <summary>
@@ -64,18 +262,70 @@ namespace DeclGUI.Editor.Renderers
         {
             if (style == null)
                 return defaultStyle ?? GUI.skin.label; // 默认返回标签样式
+
+            // 创建缓存键
+            var cacheKey = (style.GetContentHashCode(), defaultStyle?.name ?? "label");
+
+            // 从对象池获取或创建GUIStyle
+            // var guiStyle = _guiStylePool.GetOrCreateStyle(cacheKey, defaultStyle ?? GUI.skin.label);
+            var existingStyle = _guiStylePool.GetExistedStyle(cacheKey);
+            if(existingStyle != null)
+                return existingStyle;
+            
+            // 如果没有找到，创建新的GUIStyle
+            var guiStyle = _guiStylePool.GetPoolStyle(cacheKey, defaultStyle ?? GUI.skin.label);
             
             // 使用IDeclStyle接口的方法获取样式属性
-            var color = style.GetColor();
-            var backgroundColor = style.GetBackgroundColor();
-            var fontSize = style.GetFontSize();
-            var fontStyle = style.GetFontStyle();
-            var alignment = style.GetAlignment();
-            var padding = style.GetPadding();
-            var margin = style.GetMargin();
+            var color = style.Color;
+            var backgroundColor = style.BackgroundColor;
+            var borderColor = style.BorderColor;
+            var fontSize = style.FontSize;
+            var fontStyle = style.FontStyle;
+            var alignment = style.Alignment;
+            var padding = style.Padding;
+            var margin = style.Margin;
+            var borderWidth = style.BorderWidth;  // 新增：边框宽度
+            var borderRadius = style.BorderRadius;  // 新增：圆角半径
             
-            // 创建一个新的GUIStyle并应用样式属性
-            var guiStyle = new GUIStyle(defaultStyle ?? GUI.skin.label);
+            // 重置样式属性为默认值
+            var defaultStyleToUse = defaultStyle ?? GUI.skin.label;
+            guiStyle.normal = defaultStyleToUse.normal;
+            guiStyle.hover = defaultStyleToUse.hover;
+            guiStyle.active = defaultStyleToUse.active;
+            guiStyle.focused = defaultStyleToUse.focused;
+            guiStyle.onNormal = defaultStyleToUse.onNormal;
+            guiStyle.onHover = defaultStyleToUse.onHover;
+            guiStyle.onActive = defaultStyleToUse.onActive;
+            guiStyle.onFocused = defaultStyleToUse.onFocused;
+            guiStyle.border = defaultStyleToUse.border;
+            guiStyle.margin = defaultStyleToUse.margin;
+            guiStyle.padding = defaultStyleToUse.padding;
+            guiStyle.overflow = defaultStyleToUse.overflow;
+            guiStyle.font = defaultStyleToUse.font;
+            guiStyle.fontSize = defaultStyleToUse.fontSize;
+            guiStyle.fontStyle = defaultStyleToUse.fontStyle;
+            guiStyle.alignment = defaultStyleToUse.alignment;
+            guiStyle.wordWrap = defaultStyleToUse.wordWrap;
+            guiStyle.clipping = defaultStyleToUse.clipping;
+            guiStyle.imagePosition = defaultStyleToUse.imagePosition;
+            guiStyle.contentOffset = defaultStyleToUse.contentOffset;
+            guiStyle.fixedWidth = defaultStyleToUse.fixedWidth;
+            guiStyle.fixedHeight = defaultStyleToUse.fixedHeight;
+            guiStyle.stretchWidth = defaultStyleToUse.stretchWidth;
+            guiStyle.stretchHeight = defaultStyleToUse.stretchHeight;
+            
+            // 应用边框宽度到GUIStyle的border属性
+            if (borderWidth != null && borderWidth > 0)
+            {
+                // 将边框宽度应用到GUIStyle的border属性
+                int borderWidthValue = (int)borderWidth.Value;
+                guiStyle.border = new RectOffset(
+                    borderWidthValue,
+                    borderWidthValue,
+                    borderWidthValue,
+                    borderWidthValue
+                );
+            }
             
             // 应用所有样式属性
             if (color != null)
@@ -86,13 +336,17 @@ namespace DeclGUI.Editor.Renderers
                 guiStyle.focused.textColor = color.Value;
             }
             
-            if (backgroundColor != null)
-            {
-                guiStyle.normal.background = MakeTex(2, 2, backgroundColor.Value);
-                guiStyle.hover.background = MakeTex(2, 2, backgroundColor.Value);
-                guiStyle.active.background = MakeTex(2, 2, backgroundColor.Value);
-                guiStyle.focused.background = MakeTex(2, 2, backgroundColor.Value);
-            }
+            // 不再设置背景纹理以避免性能问题
+            // 如果需要背景色，应在渲染器中使用GUI.backgroundColor处理
+            // if (backgroundColor != null)
+            // {
+            //     var bgTexture = CreateOrGetTexture(backgroundColor.Value, (int?)borderWidth, (int?)borderRadius);
+            //     guiStyle.normal.background = bgTexture;
+            //     guiStyle.hover.background = bgTexture;
+            //     guiStyle.active.background = bgTexture;
+            //     guiStyle.focused.background = bgTexture;
+            // }
+        
             
             if (fontSize != null && fontSize > 0)
             {
@@ -121,6 +375,23 @@ namespace DeclGUI.Editor.Renderers
             
             return guiStyle;
         }
+    
+        
+        /// <summary>
+        /// 创建或获取纹理（缓存纹理以避免重复创建）
+        /// </summary>
+        private Texture2D CreateOrGetTexture(Color color, int? borderWidth = null, int? borderRadius = null)
+        {
+            return _guiStylePool.GetOrCreateColorTexture(color, borderWidth, borderRadius);
+        }
+        
+        /// <summary>
+        /// 清理缓存（在每帧渲染结束后调用）
+        /// </summary>
+        private void CleanupCaches()
+        {
+            _guiStylePool.Clear();
+        }
         
         /// <summary>
         /// 获取样式宽度
@@ -129,7 +400,7 @@ namespace DeclGUI.Editor.Renderers
         /// <returns>宽度值，如果没有设置则返回0</returns>
         public float GetStyleWidth(IDeclStyle style)
         {
-            return style?.GetWidth() ?? 0;
+            return style?.Width ?? 0;
         }
         
         /// <summary>
@@ -139,7 +410,7 @@ namespace DeclGUI.Editor.Renderers
         /// <returns>高度值，如果没有设置则返回0</returns>
         public float GetStyleHeight(IDeclStyle style)
         {
-            return style?.GetHeight() ?? 0;
+            return style?.Height ?? 0;
         }
 
         /// <summary>
@@ -174,10 +445,10 @@ namespace DeclGUI.Editor.Renderers
             });
             
             // 使用深红色显示标题
-            GUILayout.Label($"<color=#CC0000>⚠️ Render Error: {elementType}</color>", boldErrorStyle);
+            GUILayout.Label($"<color=#CC000>⚠️ Render Error: {elementType}</color>", boldErrorStyle);
             
             // 使用深红色显示错误消息
-            GUILayout.Label($"<color=#CC0000>Error: {exception.Message}</color>", errorStyle);
+            GUILayout.Label($"<color=#CC000>Error: {exception.Message}</color>", errorStyle);
 
             // 显示简化的堆栈信息（第一行）
             if (!string.IsNullOrEmpty(exception.StackTrace))
@@ -217,8 +488,6 @@ namespace DeclGUI.Editor.Renderers
         {
             RenderFallbackStatic(exception, element);
         }
-        
-
         
         /// <summary>
         /// 获取元素的屏幕区域

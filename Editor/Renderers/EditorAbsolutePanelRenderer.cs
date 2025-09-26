@@ -23,7 +23,7 @@ namespace DeclGUI.Editor.Renderers
 
             // 保存当前GUI状态
             var matrix = GUI.matrix;
-            var color = GUI.color;
+            var originalBackgroundColor = GUI.backgroundColor;
 
             try
             {
@@ -57,7 +57,16 @@ namespace DeclGUI.Editor.Renderers
                     calculatedRect.height = element.MaxHeight.Value;
 
                 // 开始绝对定位区域
-                GUILayout.BeginArea(calculatedRect, style);
+                GUILayout.BeginArea(calculatedRect);
+
+                // 如果有背景颜色，使用Box控件渲染背景
+                if (currentStyle?.BackgroundColor != null)
+                {
+                    var originalColor = GUI.backgroundColor;
+                    GUI.backgroundColor = currentStyle.BackgroundColor.Value;
+                    GUILayout.Box(GUIContent.none, GUILayout.Width(calculatedRect.width), GUILayout.Height(calculatedRect.height));
+                    GUI.backgroundColor = originalColor;
+                }
 
                 // 在绝对定位区域内使用自动布局渲染子元素
                 if (element.Child != null)
@@ -71,7 +80,7 @@ namespace DeclGUI.Editor.Renderers
             {
                 // 恢复GUI状态
                 GUI.matrix = matrix;
-                GUI.color = color;
+                GUI.backgroundColor = originalBackgroundColor;
             }
         }
 

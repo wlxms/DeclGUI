@@ -9,7 +9,7 @@ namespace DeclGUI.Editor.Renderers
     /// </summary>
     public class EditorLabelRenderer : EditorElementRenderer<Label>
     {
-        public override void Render(RenderManager mgr,in Label element, in IDeclStyle styleParam)
+        public override void Render(RenderManager mgr, in Label element, in IDeclStyle styleParam)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -20,40 +20,68 @@ namespace DeclGUI.Editor.Renderers
             var width = editorMgr.GetStyleWidth(currentStyle);
             var height = editorMgr.GetStyleHeight(currentStyle);
 
-            if (width > 0 && height > 0)
-            {
-                GUILayout.Label(element.Text, style, GUILayout.Width(width), GUILayout.Height(height));
-            }
-            else if (width > 0)
-            {
-                GUILayout.Label(element.Text, style, GUILayout.Width(width));
-            }
-            else if (height > 0)
-            {
-                GUILayout.Label(element.Text, style, GUILayout.Height(height));
-            }
-            else
-            {
-                GUILayout.Label(element.Text, style);
-            }
-}
+            // 保存原始颜色
+            var originalBackgroundColor = GUI.backgroundColor;
+            var originalColor = GUI.color;
+            var originalContentColor = GUI.contentColor;
 
-/// <summary>
-/// 获取Label元素的屏幕区域
-/// 在Editor环境下，需要跟踪最后渲染的矩形区域
-/// </summary>
-/// <returns>Label的屏幕矩形</returns>
-public override Rect GetElementRect()
-{
-    // 在Editor环境下，可以使用GUILayoutUtility.GetLastRect()获取最后渲染的矩形
-    // 注意：这需要在渲染后立即调用才有效
-    return GUILayoutUtility.GetLastRect();
-}
+            // 应用样式颜色
+            if (currentStyle?.BackgroundColor != null)
+            {
+                GUI.backgroundColor = currentStyle.BackgroundColor.Value;
+            }
+            
+            if (currentStyle?.Color != null)
+            {
+                GUI.color = currentStyle.Color.Value;
+                // 同时设置contentColor以确保文字颜色正确
+                GUI.contentColor = currentStyle.Color.Value;
+            }
 
-/// <summary>
-/// 计算Label的期望大小
-/// </summary>
-public override Vector2 CalculateSize(RenderManager mgr,in Label element,in IDeclStyle style)
+            try
+            {
+                if (width > 0 && height > 0)
+                {
+                    GUILayout.Label(element.Text, style, GUILayout.Width(width), GUILayout.Height(height));
+                }
+                else if (width > 0)
+                {
+                    GUILayout.Label(element.Text, style, GUILayout.Width(width));
+                }
+                else if (height > 0)
+                {
+                    GUILayout.Label(element.Text, style, GUILayout.Height(height));
+                }
+                else
+                {
+                    GUILayout.Label(element.Text, style);
+                }
+            }
+            finally
+            {
+                // 恢复原始颜色
+                GUI.backgroundColor = originalBackgroundColor;
+                GUI.color = originalColor;
+                GUI.contentColor = originalContentColor;
+            }
+        }
+
+        /// <summary>
+        /// 获取Label元素的屏幕区域
+        /// 在Editor环境下，需要跟踪最后渲染的矩形区域
+        /// </summary>
+        /// <returns>Label的屏幕矩形</returns>
+        public override Rect GetElementRect()
+        {
+            // 在Editor环境下，可以使用GUILayoutUtility.GetLastRect()获取最后渲染的矩形
+            // 注意：这需要在渲染后立即调用才有效
+            return GUILayoutUtility.GetLastRect();
+        }
+
+        /// <summary>
+        /// 计算Label的期望大小
+        /// </summary>
+        public override Vector2 CalculateSize(RenderManager mgr, in Label element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)

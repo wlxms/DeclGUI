@@ -52,8 +52,60 @@ namespace DeclGUI.Core
     }
 
     /// <summary>
+    /// 过渡状态结构体
+    /// 用于管理样式过渡动画的状态
+    /// </summary>
+    public class TransitionState
+    {
+        /// <summary>
+        /// 起始样式
+        /// </summary>
+        public IDeclStyle FromStyle { get; set; }
+        
+        /// <summary>
+        /// 目标样式
+        /// </summary>
+        public IDeclStyle ToStyle { get; set; }
+        
+        /// <summary>
+        /// 过渡开始时间
+        /// </summary>
+        public float StartTime { get; set; }
+        
+        /// <summary>
+        /// 过渡持续时间
+        /// </summary>
+        public float Duration { get; set; }
+        
+        /// <summary>
+        /// 缓动曲线
+        /// </summary>
+        public AnimationCurve EasingCurve { get; set; }
+        
+        /// <summary>
+        /// 过渡属性列表
+        /// </summary>
+        public string[] Properties { get; set; }
+        
+        /// <summary>
+        /// 当前过渡进度（0-1）
+        /// </summary>
+        public float Progress => Mathf.Clamp01((Time.time - StartTime) / Duration);
+        
+        /// <summary>
+        /// 是否已完成过渡
+        /// </summary>
+        public bool IsCompleted => Progress >= 1f;
+        
+        /// <summary>
+        /// 缓动后的进度
+        /// </summary>
+        public float EasedProgress => EasingCurve?.Evaluate(Progress) ?? Progress;
+    }
+
+    /// <summary>
     /// 元素状态接口
-    /// 用于事件处理的状态管理，包含悬停状态和通用状态存储
+    /// 用于事件处理的状态管理，包含完整的交互状态管理
     /// </summary>
     public interface IElementState
     {
@@ -69,9 +121,80 @@ namespace DeclGUI.Core
         HoverState HoverState { get; set; }
         
         /// <summary>
+        /// 元素的聚焦状态
+        /// </summary>
+        FocusState FocusState { get; set; }
+        
+        /// <summary>
+        /// 元素的禁用状态
+        /// </summary>
+        DisabledState DisabledState { get; set; }
+        
+        /// <summary>
+        /// 元素的过渡状态
+        /// </summary>
+        TransitionState TransitionState { get; set; }
+        
+        /// <summary>
         /// 通用状态存储
         /// 用于存储任意事件相关的状态数据
         /// </summary>
         object State { get; set; }
+        
+        /// <summary>
+        /// 当前元素状态标志（组合状态）
+        /// </summary>
+        ElementStateFlags CurrentStateFlags { get; }
+        
+        /// <summary>
+        /// 更新当前状态标志
+        /// 根据各个状态的状态值计算组合状态
+        /// </summary>
+        void UpdateStateFlags();
+        
+        /// <summary>
+        /// 检查是否处于指定状态
+        /// </summary>
+        /// <param name="stateFlag">要检查的状态标志</param>
+        /// <returns>如果处于指定状态则返回true</returns>
+        bool HasState(ElementStateFlags stateFlag);
+        
+        /// <summary>
+        /// 检查是否处于任何指定状态之一
+        /// </summary>
+        /// <param name="stateFlags">要检查的状态标志组合</param>
+        /// <returns>如果处于任何指定状态则返回true</returns>
+        bool HasAnyState(ElementStateFlags stateFlags);
+        
+        /// <summary>
+        /// 检查是否处于所有指定状态
+        /// </summary>
+        /// <param name="stateFlags">要检查的状态标志组合</param>
+        /// <returns>如果处于所有指定状态则返回true</returns>
+        bool HasAllStates(ElementStateFlags stateFlags);
+        
+        /// <summary>
+        /// 设置禁用状态
+        /// </summary>
+        /// <param name="disabled">是否禁用</param>
+        /// <param name="reason">禁用原因（可选）</param>
+        /// <param name="isContextControlled">是否由上下文控制</param>
+        void SetDisabled(bool disabled, string reason = null, bool isContextControlled = false);
+        
+        /// <summary>
+        /// 设置聚焦状态
+        /// </summary>
+        /// <param name="focused">是否聚焦</param>
+        void SetFocused(bool focused);
+        
+        /// <summary>
+        /// 重置所有交互状态（保留通用状态）
+        /// </summary>
+        void ResetInteractiveStates();
+        
+        /// <summary>
+        /// 获取当前状态的描述字符串（用于调试）
+        /// </summary>
+        string GetStateDescription();
     }
 }

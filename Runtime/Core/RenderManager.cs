@@ -150,6 +150,8 @@ namespace DeclGUI.Core
                 RenderElementInternal(element);
             }
 
+            ProcessDisableState(element);
+
             // 处理事件（如果有当前事件）- 在渲染之后进行
             // 在Editor环境下，即使事件类型是Repaint也需要处理Hover事件
             if (_currentEvent != null && IsNeedProcessEevent(element))
@@ -167,9 +169,40 @@ namespace DeclGUI.Core
                         eventfulElement.Events.OnPressUp != null ||
                         eventfulElement.Events.OnScroll != null ||
                         eventfulElement.Events.OnHoverEnter != null ||
-                        eventfulElement.Events.OnHoverExit != null;
+                        eventfulElement.Events.OnHoverExit != null ||
+                        eventfulElement.Events.OnFocus != null ||
+                        eventfulElement.Events.OnBlur != null;
             }
             return false;
+        }
+
+        private void ProcessDisableState(IElement element)
+        {
+            if (element is IElementWithKey elementWithKey)
+            {
+                IElementState elementState = GetElementState(elementWithKey);
+                if (elementState == null)
+                    return;
+
+                if (ContextStack.Has<DisableContext>())
+                {
+                    var disabledContext = ContextStack.Get<DisableContext>();
+                    elementState.SetDisabled(disabledContext.Value);
+                }
+                else
+                {
+                    elementState.SetDisabled(false);
+                }
+            }
+        }
+
+        public IElementState GetElementState(IElementWithKey element)
+        {
+            if (element == null || StateStack.IsEmpty())
+                return null;
+
+            var stateManager = StateStack.CurrentStateManager;
+            return stateManager?.GetOrCreateState(element);
         }
 
         /// <summary>
@@ -178,11 +211,18 @@ namespace DeclGUI.Core
         /// </summary>
         private void ProcessElementEvents(IElement element)
         {
+            IElementState elementState = null;
+            if (element is IElementWithKey elementWithKey)
+            {
+                elementState = GetElementState(elementWithKey);
+            }
+
             // 只处理可处理事件的元素
             if (element is IEventfulElement eventfulElement)
             {
                 // 获取元素的屏幕区域（需要渲染器提供）
                 Rect elementRect = GetElementScreenRect(element);
+
 
                 // 检查事件是否发生在元素区域内
                 if (elementRect.Contains(_currentEvent.mousePosition))
@@ -190,6 +230,23 @@ namespace DeclGUI.Core
                     switch (_currentEvent.type)
                     {
                         case EventType.MouseDown:
+                            // 处理焦点获取：当鼠标点击在元素上时，设置该元素为聚焦状态
+                            if (elementState != null)
+                            {
+                                if (!elementState.HasState(ElementStateFlags.Disabled))
+                                {
+                                    // 检查是否当前元素没有焦点，如果是则触发Focus事件
+                                    bool wasFocused = elementState.HasState(ElementStateFlags.Focus);
+
+                                    elementState.SetFocused(true);
+
+                                    // 仅在元素之前没有焦点时触发Focus事件
+                                    if (!wasFocused)
+                                    {
+                                        eventfulElement.Events.OnFocus?.Invoke();
+                                    }
+                                }
+                            }
                             eventfulElement.Events.OnPressDown?.Invoke();
                             break;
                         case EventType.MouseUp:
@@ -210,10 +267,34 @@ namespace DeclGUI.Core
                             break;
                     }
                 }
-                else if (_currentEvent.type == EventType.Repaint)
+                else
                 {
-                    // 在Repaint事件中，即使鼠标不在元素上，也需要处理Hover退出
-                    HandleHoverEvents(eventfulElement, false);
+                    switch (_currentEvent.type)
+                    {
+                        case EventType.MouseDown:
+                            {
+                                // 检查当前是否有其他元素获得了焦点
+                                // 这里简单地认为只要鼠标不在当前元素上，就触发Blur事件
+                                bool wasFocused = elementState.HasState(ElementStateFlags.Focus);
+                                // 检查失焦事件：如果元素之前有焦点，但现在鼠标不在其上，则触发Blur事件
+                                if (elementState != null && wasFocused)
+                                {
+                                    elementState.SetFocused(false);
+
+                                    // 仅在元素之前有焦点时触发Blur事件
+                                    if (wasFocused)
+                                    {
+                                        eventfulElement.Events.OnBlur?.Invoke();
+                                    }
+                                }
+                                break;
+                            }
+                        case EventType.Repaint:
+                            HandleHoverEvents(eventfulElement, false);
+                            break;
+                    }
+
+
                 }
             }
         }
@@ -238,26 +319,26 @@ namespace DeclGUI.Core
                 var hoverState = elementState.HoverState;
                 var currentTime = Time.time;
 
-                // 检查鼠标是否在元素区域内
-                Rect elementRect = GetElementScreenRect(element);
-
                 if (isMouseOver)
                 {
-
-
                     if (hoverState.ShouldTriggerEnter)
                     {
                         // 触发Enter事件：从非悬停状态进入悬停状态
                         hoverState.IsHovering = true;
                         hoverState.HoverStartTime = currentTime;
                         element.Events.OnHoverEnter?.Invoke();
+
+                        // 设置LastHoverTime为HoverStartTime，确保下一次不会重复触发Enter
+                        hoverState.LastHoverTime = hoverState.HoverStartTime;
                     }
-                    // 鼠标在元素上，更新悬停时间
-                    hoverState.LastHoverTime = currentTime;
+                    else
+                    {
+                        // 鼠标在元素上，更新悬停时间（仅在非Enter触发时）
+                        hoverState.LastHoverTime = currentTime;
+                    }
                 }
                 else
                 {
-
                     // 鼠标不在元素上
                     if (hoverState.ShouldTriggerLeave)
                     {
@@ -265,11 +346,17 @@ namespace DeclGUI.Core
                         hoverState.LastLeaveTime = currentTime;
                         element.Events.OnHoverExit?.Invoke();
                         hoverState.IsHovering = false;
+
+                        // 重置LastHoverTime，确保下一次进入时可以触发Enter
+                        hoverState.LastHoverTime = 0f;
                     }
                 }
 
                 // 更新元素状态
                 elementState.HoverState = hoverState;
+
+                // 更新状态标志（确保状态同步）
+                elementState.UpdateStateFlags();
             }
         }
 
@@ -300,13 +387,27 @@ namespace DeclGUI.Core
             try
             {
                 IElementState state = null;
-                // 统一渲染逻辑
-                if (element is IStatefulElement statefulElement)
+                // 统一渲染逻辑：为所有IElementWithKey的元素创建状态
+                if (element is IElementWithKey elementWithKey)
                 {
                     if (!StateStack.IsEmpty())
                     {
                         // 使用状态栈的当前状态管理器
-                        state = StateStack.CurrentStateManager.GetOrCreateState(statefulElement);
+                        state = StateStack.CurrentStateManager.GetOrCreateState(elementWithKey);
+
+                        // 如果元素是IStatefulElement，调用其CreateState方法
+                        if (element is IStatefulElement statefulElement)
+                        {
+                            var customState = statefulElement.CreateState();
+                            if (customState != null)
+                            {
+                                // 将自定义状态设置到ElementState的State属性中
+                                if (state is ElementState concreteState)
+                                {
+                                    concreteState.State = customState;
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -386,9 +487,15 @@ namespace DeclGUI.Core
                 // 解析样式（处理样式集引用）
                 IDeclStyle resolvedStyle = DeclThemeManager.ResolveStyle(stylefulElement.Style, elementState);
 
+                // 获取过渡配置
+                var transitionConfig = GetTransitionConfig(resolvedStyle);
+
+                // 获取当前样式（如果有过渡，则使用过渡样式；否则使用解析后的样式）
+                IDeclStyle currentStyle = GetCurrentStyle(elementState, resolvedStyle);
+
                 // 应用过渡效果
                 IDeclStyle finalStyle = TransitionProcessor.ProcessTransition(
-                    resolvedStyle, elementState, stylefulElement.Key);
+                    currentStyle, resolvedStyle, elementState, transitionConfig);
 
                 style = finalStyle;
             }
@@ -682,11 +789,54 @@ namespace DeclGUI.Core
         protected abstract void RenderFallback(Exception exception, IElement element);
 
         /// <summary>
-        /// 更新过渡效果（每帧调用）
+        /// 获取过渡配置
         /// </summary>
-        public void UpdateTransitions(float deltaTime)
+        private TransitionConfig? GetTransitionConfig(IDeclStyle style)
         {
-            TransitionProcessor.UpdateTransitions(deltaTime);
+            // 如果样式是DeclStyleSet类型，尝试获取其过渡配置
+            if (style is DeclStyleSet styleSet)
+            {
+                return styleSet.Transition;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 获取当前样式
+        /// </summary>
+        private IDeclStyle GetCurrentStyle(IElementState elementState, IDeclStyle targetStyle)
+        {
+            // 如果有活跃的过渡，返回过渡样式
+            if (elementState.TransitionState != null &&
+                elementState.TransitionState.FromStyle != null &&
+                !elementState.TransitionState.IsCompleted)
+            {
+                return elementState.TransitionState.ToStyle == targetStyle
+                    ? elementState.TransitionState.FromStyle
+                    : targetStyle;
+            }
+
+            return targetStyle;
+        }
+
+        /// <summary>
+        /// 推送上下文到上下文栈
+        /// </summary>
+        /// <typeparam name="T">上下文类型</typeparam>
+        /// <param name="context">上下文实例</param>
+        public void PushContext<T>(T context) where T : IContextProvider
+        {
+            ContextStack.Push(typeof(T), context);
+        }
+
+        /// <summary>
+        /// 从上下文栈弹出指定类型的上下文
+        /// </summary>
+        /// <typeparam name="T">上下文类型</typeparam>
+        public void PopContext<T>() where T : IContextProvider
+        {
+            ContextStack.Pop(typeof(T));
         }
     }
 }
