@@ -30,12 +30,12 @@ namespace DeclGUI.Editor.Renderers
 
             // 保存当前GUI enabled状态
             bool originalGUIEnabled = GUI.enabled;
-            
+
             // 在只读状态下禁用GUI
             GUI.enabled = !isReadOnly;
 
             var currentStyle = styleParam ?? element.Style;
-            
+
             // 保存原始颜色
             var originalBackgroundColor = GUI.backgroundColor;
             var originalColor = GUI.color;
@@ -46,7 +46,7 @@ namespace DeclGUI.Editor.Renderers
             {
                 GUI.backgroundColor = currentStyle.BackgroundColor.Value;
             }
-            
+
             if (currentStyle?.Color != null)
             {
                 GUI.color = currentStyle.Color.Value;
@@ -58,13 +58,28 @@ namespace DeclGUI.Editor.Renderers
             {
                 var style = editorMgr.ApplyStyle(styleParam ?? element.Style, EditorStyles.numberField);
                 var width = editorMgr.GetStyleWidth(styleParam ?? element.Style);
+                
+                var newValue = element.Value;
 
-                // 渲染整数字段
-                var newValue = EditorGUILayout.IntField(
-                    element.Value,
-                    style,
-                    GUILayout.Width(width > 0 ? width : 100)
-                );
+                if (width > 0)
+                {
+                    // 渲染整数字段
+                    newValue = EditorGUILayout.IntField(
+                        element.Value,
+                        style,
+                        GUILayout.Width(width)
+                    );
+                }
+                else
+                {
+                    // 渲染整数字段
+                    newValue = EditorGUILayout.IntField(
+                        element.Value,
+                        style
+                    );
+                }
+
+
 
                 // 检查值是否变化并触发回调
                 if (newValue != element.Value && element.OnValueChanged != null)
@@ -78,7 +93,7 @@ namespace DeclGUI.Editor.Renderers
                 GUI.backgroundColor = originalBackgroundColor;
                 GUI.color = originalColor;
                 GUI.contentColor = originalContentColor;
-                
+
                 // 恢复原始GUI enabled状态
                 GUI.enabled = originalGUIEnabled;
             }
@@ -87,7 +102,7 @@ namespace DeclGUI.Editor.Renderers
         /// <summary>
         /// 计算IntField元素的期望大小
         /// </summary>
-        public override Vector2 CalculateSize(RenderManager mgr,in IntField element,in IDeclStyle style)
+        public override Vector2 CalculateSize(RenderManager mgr, in IntField element, in IDeclStyle style)
         {
             var editorMgr = mgr as EditorRenderManager;
             if (editorMgr == null)
@@ -106,17 +121,17 @@ namespace DeclGUI.Editor.Renderers
 
             // 计算文本内容大小
             Vector2 textSize = CalculateTextSize(element.Value.ToString(), guiStyle, width > 0 ? width : 0);
-            
+
             // 添加字段的padding和border
             Vector2 totalSize = textSize;
             if (guiStyle != null)
             {
                 totalSize.x += guiStyle.padding.left + guiStyle.padding.right;
                 totalSize.y += guiStyle.padding.top + guiStyle.padding.bottom;
-                
+
                 totalSize.x += guiStyle.border.left + guiStyle.border.right;
                 totalSize.y += guiStyle.border.top + guiStyle.border.bottom;
-                
+
                 // 确保至少有最小尺寸
                 totalSize.x = Mathf.Max(totalSize.x, guiStyle.fixedWidth > 0 ? guiStyle.fixedWidth : 100);
                 totalSize.y = Mathf.Max(totalSize.y, guiStyle.fixedHeight > 0 ? guiStyle.fixedHeight : 0);

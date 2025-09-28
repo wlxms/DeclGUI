@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using DeclGUI.Core;
+using System.Linq;
 
 namespace DeclGUI.Core
 {
@@ -13,6 +14,12 @@ namespace DeclGUI.Core
     {
         private readonly Dictionary<Type, IElementRenderer> _renderers = new Dictionary<Type, IElementRenderer>();
         private bool _initialized = false;
+        
+        // 样式缓存（使用引用计数管理）
+        private readonly Dictionary<string, IDeclStyle> _styleCache = new Dictionary<string, IDeclStyle>();
+        private readonly Dictionary<string, int> _styleCacheRefCount = new Dictionary<string, int>();
+        private readonly Dictionary<string, IDeclStyle> _resolvedStyleCache = new Dictionary<string, IDeclStyle>();
+        private readonly Dictionary<string, int> _resolvedStyleCacheRefCount = new Dictionary<string, int>();
 
         /// <summary>
         /// 状态栈管理器
@@ -38,6 +45,16 @@ namespace DeclGUI.Core
         /// 当前正在处理的事件
         /// </summary>
         private Event _currentEvent;
+        
+        /// <summary>
+        /// 初始化元素状态
+        /// 子类可以重写此方法来为元素添加特定的渲染器状态
+        /// </summary>
+        /// <param name="elementState">元素状态对象</param>
+        protected virtual void OnElementStateCreated(IElementState elementState)
+        {
+            // 默认实现为空，子类可以重写以添加特定的渲染器状态
+        }
 
         /// <summary>
         /// 当前正在处理的事件
@@ -97,11 +114,16 @@ namespace DeclGUI.Core
 
             try
             {
+                // 开始渲染帧，重置引用计数器
+                BeginRenderFrame();
+                
                 // 递归渲染元素（事件处理在渲染过程中进行）
                 RenderElement(element);
             }
             finally
             {
+                // 结束渲染帧，清理未使用的缓存
+                EndRenderFrame();
                 ResetAndCleanupUnuseState();
                 _currentEvent = null;
             }
@@ -394,20 +416,6 @@ namespace DeclGUI.Core
                     {
                         // 使用状态栈的当前状态管理器
                         state = StateStack.CurrentStateManager.GetOrCreateState(elementWithKey);
-
-                        // 如果元素是IStatefulElement，调用其CreateState方法
-                        if (element is IStatefulElement statefulElement)
-                        {
-                            var customState = statefulElement.CreateState();
-                            if (customState != null)
-                            {
-                                // 将自定义状态设置到ElementState的State属性中
-                                if (state is ElementState concreteState)
-                                {
-                                    concreteState.State = customState;
-                                }
-                            }
-                        }
                     }
                 }
 
@@ -484,20 +492,22 @@ namespace DeclGUI.Core
             // 处理样式化元素
             if (element is IStylefulElement stylefulElement && elementState != null)
             {
-                // 解析样式（处理样式集引用）
-                IDeclStyle resolvedStyle = DeclThemeManager.ResolveStyle(stylefulElement.Style, elementState);
+                // 使用缓存机制解析样式
+                IDeclStyle resolvedStyle = ResolveStyleWithCache(stylefulElement.Style, elementState);
 
-                // 获取过渡配置
-                var transitionConfig = GetTransitionConfig(resolvedStyle);
+                // 过渡功能不够成熟，不再处理过渡
+                
+                // // 获取过渡配置
+                // var transitionConfig = GetTransitionConfig(resolvedStyle);
 
-                // 获取当前样式（如果有过渡，则使用过渡样式；否则使用解析后的样式）
-                IDeclStyle currentStyle = GetCurrentStyle(elementState, resolvedStyle);
+                // // 获取当前样式（如果有过渡，则使用过渡样式；否则使用解析后的样式）
+                // IDeclStyle currentStyle = GetCurrentStyle(elementState, resolvedStyle);
 
-                // 应用过渡效果
-                IDeclStyle finalStyle = TransitionProcessor.ProcessTransition(
-                    currentStyle, resolvedStyle, elementState, transitionConfig);
+                // // 应用过渡效果
+                // IDeclStyle finalStyle = TransitionProcessor.ProcessTransition(
+                //     currentStyle, resolvedStyle, elementState, transitionConfig);
 
-                style = finalStyle;
+                style = resolvedStyle;
             }
 
             // 首先尝试精确匹配
@@ -580,38 +590,6 @@ namespace DeclGUI.Core
                 RenderFallback(ex, element);
             }
         }
-
-        // /// <summary>
-        // /// 渲染有状态元素（带状态参数）
-        // /// </summary>
-        // /// <param name="element">有状态元素</param>
-        // /// <param name="state">元素状态</param>
-        // public void RenderElement(in IStatefulElement element, object state)
-        // {
-        //     if (element == null)
-        //         return;
-
-        //     // 尝试使用渲染器渲染（带状态）
-        //     if (TryRenderWithRenderer(element, state))
-        //     {
-        //         return;
-        //     }
-
-        //     try
-        //     {
-        //         // 如果没有找到渲染器，调用元素的Render方法
-        //         var renderTarget = element.Render(state);
-        //         if (renderTarget != null && renderTarget != element)
-        //         {
-        //             RenderElement(renderTarget);
-        //         }
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         // 如果没有渲染器，使用管理器的Fallback方法
-        //         RenderFallback(ex, element);
-        //     }
-        // }
 
         /// <summary>
         /// 获取指定类型的渲染器
@@ -756,12 +734,15 @@ namespace DeclGUI.Core
                 container.Key = key; // 保持Key，使其在接下来的渲染状态都不变
                 return StateStack.CurrentStorage.GetOrCreateChildStateManagerStorage(key, () =>
                 {
-                    return new StateManagerStorage(new ContainerState());
+                    return new StateManagerStorage(new StateManager());
                 });
             }
 
             if (_rootStorage == null)
-                _rootStorage = new StateManagerStorage(new ContainerState());
+            { 
+                _rootStorage = new StateManagerStorage(new StateManager());
+                _rootStorage.OnElementStateCreated += OnElementStateCreated;
+            }
 
             return _rootStorage;
         }
@@ -838,5 +819,155 @@ namespace DeclGUI.Core
         {
             ContextStack.Pop(typeof(T));
         }
+
+        #region 样式缓存管理
+
+        /// <summary>
+        /// 开始渲染帧（在渲染开始前调用）
+        /// </summary>
+        private void BeginRenderFrame()
+        {
+            // 重置所有引用计数器为0（避免枚举时修改集合）
+            var styleKeys = new List<string>(_styleCacheRefCount.Keys);
+            foreach (var key in styleKeys)
+            {
+                _styleCacheRefCount[key] = 0;
+            }
+            
+            var resolvedKeys = new List<string>(_resolvedStyleCacheRefCount.Keys);
+            foreach (var key in resolvedKeys)
+            {
+                _resolvedStyleCacheRefCount[key] = 0;
+            }
+        }
+
+        /// <summary>
+        /// 结束渲染帧（在渲染结束后调用）
+        /// </summary>
+        private void EndRenderFrame()
+        {
+            // 清除引用计数为0的缓存项
+            ClearUnusedCacheItems();
+        }
+
+        /// <summary>
+        /// 清除未使用的缓存项
+        /// </summary>
+        private void ClearUnusedCacheItems()
+        {
+            // 清除样式缓存
+            var styleKeysToRemove = _styleCacheRefCount
+                .Where(kv => kv.Value == 0)
+                .Select(kv => kv.Key)
+                .ToList();
+            
+            foreach (var key in styleKeysToRemove)
+            {
+                _styleCache.Remove(key);
+                _styleCacheRefCount.Remove(key);
+            }
+            
+            // 清除解析样式缓存
+            var resolvedKeysToRemove = _resolvedStyleCacheRefCount
+                .Where(kv => kv.Value == 0)
+                .Select(kv => kv.Key)
+                .ToList();
+            
+            foreach (var key in resolvedKeysToRemove)
+            {
+                _resolvedStyleCache.Remove(key);
+                _resolvedStyleCacheRefCount.Remove(key);
+            }
+        }
+
+        /// <summary>
+        /// 获取缓存的样式（带引用计数）
+        /// </summary>
+        private IDeclStyle GetCachedStyle(string cacheKey, Dictionary<string, IDeclStyle> cache, Dictionary<string, int> refCount)
+        {
+            if (cache.TryGetValue(cacheKey, out var cachedStyle))
+            {
+                // 增加引用计数
+                refCount[cacheKey]++;
+                return cachedStyle;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 设置缓存的样式（带引用计数）
+        /// </summary>
+        private void SetCachedStyle(string cacheKey, IDeclStyle style, Dictionary<string, IDeclStyle> cache, Dictionary<string, int> refCount)
+        {
+            cache[cacheKey] = style;
+            refCount[cacheKey] = 1; // 初始引用计数为1
+        }
+
+        /// <summary>
+        /// 解析样式（带缓存）
+        /// </summary>
+        public IDeclStyle ResolveStyleWithCache(IDeclStyle style, IElementState elementState = null)
+        {
+            if (style == null) return null;
+            
+            // 根据元素状态确定伪类
+            PseudoClass pseudoClass = DeterminePseudoClassFromState(elementState);
+            
+            return ResolveStyleWithCache(style, pseudoClass);
+        }
+
+        /// <summary>
+        /// 解析样式（带缓存）
+        /// </summary>
+        public IDeclStyle ResolveStyleWithCache(IDeclStyle style, PseudoClass pseudoClass = PseudoClass.Normal)
+        {
+            if (style == null) return null;
+            
+            // 生成缓存键
+            string cacheKey = DeclThemeManager.GenerateCacheKey(style, pseudoClass);
+            
+            // 检查缓存
+            var cachedStyle = GetCachedStyle(cacheKey, _styleCache, _styleCacheRefCount);
+            if (cachedStyle != null)
+            {
+                return cachedStyle;
+            }
+            
+            // 调用DeclThemeManager进行样式解析
+            var resolvedStyle = DeclThemeManager.ResolveStyle(style, pseudoClass);
+            
+            // 缓存结果
+            SetCachedStyle(cacheKey, resolvedStyle, _styleCache, _styleCacheRefCount);
+            
+            return resolvedStyle;
+        }
+
+        /// <summary>
+        /// 根据元素状态确定伪类
+        /// </summary>
+        private PseudoClass DeterminePseudoClassFromState(IElementState elementState)
+        {
+            if (elementState == null) return PseudoClass.Normal;
+            
+            // 这里可以根据元素状态确定伪类
+            // 目前只处理悬停状态，可以根据需要扩展其他状态
+            if (elementState.CurrentStateFlags.HasFlag(ElementStateFlags.Hover))
+                return PseudoClass.Hover;
+                
+            return PseudoClass.Normal;
+        }
+
+        /// <summary>
+        /// 清空样式缓存
+        /// </summary>
+        public void ClearStyleCache()
+        {
+            _styleCache.Clear();
+            _resolvedStyleCache.Clear();
+            _styleCacheRefCount.Clear();
+            _resolvedStyleCacheRefCount.Clear();
+        }
+
+        #endregion
     }
 }

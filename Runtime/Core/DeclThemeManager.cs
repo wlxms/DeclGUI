@@ -11,24 +11,75 @@ namespace DeclGUI.Core
     {
         private static DeclTheme _currentTheme;
         
-        // 缓存已解析的样式，提高性能
-        private static readonly Dictionary<string, IDeclStyle> _styleCache = new Dictionary<string, IDeclStyle>();
-        private static readonly Dictionary<string, IDeclStyle> _resolvedStyleCache = new Dictionary<string, IDeclStyle>();
-        
-        // 缓存键生成器
-        private static string GenerateCacheKey(IDeclStyle style, PseudoClass pseudoClass)
+        // 缓存键生成器（保留用于RenderManager）
+        public static string GenerateCacheKey(IDeclStyle style, PseudoClass pseudoClass)
         {
             if (style == null) return "null";
-            int styleHash = style.GetContentHashCode();
+            int styleHash = GetStyleChainContentHashCode(style, CurrentTheme);
             return $"{styleHash}_{pseudoClass}";
         }
         
-        private static string GenerateResolvedCacheKey(IDeclStyle style, DeclTheme theme)
+        public static string GenerateResolvedCacheKey(IDeclStyle style, DeclTheme theme)
         {
             if (style == null || theme == null) return "null";
-            int styleHash = style.GetContentHashCode();
+            int styleHash = GetStyleChainContentHashCode(style, theme);
             int themeHash = theme.GetHashCode();
             return $"{styleHash}_{themeHash}";
+        }
+        
+        /// <summary>
+        /// 计算整个样式引用链的内容哈希码（包括引用的样式集和属性引用）
+        /// </summary>
+        /// <param name="style">起始样式</param>
+        /// <param name="theme">当前主题（用于计算属性引用值）</param>
+        /// <returns>包含整个引用链的哈希码</returns>
+        private static int GetStyleChainContentHashCode(IDeclStyle style, DeclTheme theme)
+        {
+            if (style == null) return 0;
+            
+            unchecked
+            {
+                int hash = 17;
+                var currentStyle = style;
+                var visitedStyles = new HashSet<string>(); // 防止循环引用导致无限循环
+                
+                // 遍历整个样式引用链
+                while (currentStyle != null && !string.IsNullOrEmpty(currentStyle.StyleSetId))
+                {
+                    // 检查循环引用
+                    if (visitedStyles.Contains(currentStyle.StyleSetId))
+                    {
+                        Debug.LogWarning($"DeclThemeManager: 检测到样式集引用循环: {currentStyle.StyleSetId}");
+                        break;
+                    }
+                    
+                    visitedStyles.Add(currentStyle.StyleSetId);
+                    
+                    // 添加当前样式对象的哈希值（包含主题属性值）
+                    hash = hash * 23 + currentStyle.GetContentHashCode(theme);
+                    
+                    // 获取引用的样式集
+                    var styleSet = GetStyleSet(currentStyle.StyleSetId);
+                    if (styleSet != null)
+                    {
+                        // 继续遍历引用的样式集
+                        currentStyle = styleSet;
+                    }
+                    else
+                    {
+                        // 如果样式集不存在，停止遍历
+                        break;
+                    }
+                }
+                
+                // 如果最终样式不为null且未在引用链中（即基础样式），也加入哈希计算
+                if (currentStyle != null && !visitedStyles.Contains(currentStyle.StyleSetId ?? ""))
+                {
+                    hash = hash * 23 + currentStyle.GetContentHashCode(theme);
+                }
+                
+                return hash;
+            }
         }
         
         /// <summary>
@@ -36,8 +87,7 @@ namespace DeclGUI.Core
         /// </summary>
         public static void ClearCache()
         {
-            _styleCache.Clear();
-            _resolvedStyleCache.Clear();
+            // 缓存已移至RenderManager，此方法保留用于向后兼容
         }
         
         /// <summary>
@@ -94,13 +144,6 @@ namespace DeclGUI.Core
         {
             if (style == null) return null;
             
-            // 检查缓存
-            string cacheKey = GenerateCacheKey(style, pseudoClass);
-            if (_styleCache.TryGetValue(cacheKey, out var cachedStyle))
-            {
-                return cachedStyle;
-            }
-            
             IDeclStyle resolvedStyle = style;
             
             // 使用迭代代替递归处理样式集引用链
@@ -156,9 +199,6 @@ namespace DeclGUI.Core
             // 解析所有StyleProperty中的PropertyRef引用，返回最终样式
             resolvedStyle = ResolveStylePropertyReferences(resolvedStyle);
             
-            // 缓存结果
-            _styleCache[cacheKey] = resolvedStyle;
-            
             return resolvedStyle;
         }
         /// <summary>
@@ -167,14 +207,6 @@ namespace DeclGUI.Core
         private static IDeclStyle ResolveStylePropertyReferences(IDeclStyle style)
         {
             if (style == null) return null;
-
-            // 检查缓存
-            var theme = CurrentTheme;
-            string cacheKey = GenerateResolvedCacheKey(style, theme);
-            if (_resolvedStyleCache.TryGetValue(cacheKey, out var cachedResolvedStyle))
-            {
-                return cachedResolvedStyle;
-            }
 
             // 只处理ISerializableDeclStyle（DeclStyle/DeclStyleSet）
             if (style is ISerializableDeclStyle serializable)
@@ -190,10 +222,11 @@ namespace DeclGUI.Core
                 // 如果没有PropertyRef，直接返回原样式
                 if (!needsResolution)
                 {
-                    _resolvedStyleCache[cacheKey] = style;
                     return style;
                 }
 
+                var theme = CurrentTheme;
+                
                 // 解析每个StyleProperty<T>，如果是PropertyRef则替换为Direct值
                 // 注意：此处会生成一个新的DeclStyle实例，避免修改原对象
                 var resolved = new DeclStyle(
@@ -212,11 +245,9 @@ namespace DeclGUI.Core
                     borderRadius: ResolvePropertyValue(serializable.BorderRadius, theme)
                 );
                 
-                _resolvedStyleCache[cacheKey] = resolved;
                 return resolved;
             }
             // 其他类型直接返回
-            _resolvedStyleCache[cacheKey] = style;
             return style;
         }
         

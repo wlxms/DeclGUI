@@ -52,27 +52,27 @@ namespace DeclGUI.Editor.Renderers
             finally
             {
                 EditorGUILayout.EndScrollView();
-            }
 
-            if (currentStyle?.BackgroundColor != null)
-            {
-                // 保存原始颜色
-                var originalBackgroundColor = GUI.backgroundColor;
-                var originalColor = GUI.color;
-                var originalContentColor = GUI.contentColor;
+                if (currentStyle?.BackgroundColor != null)
+                {
+                    // 保存原始颜色
+                    var originalBackgroundColor = GUI.backgroundColor;
+                    var originalColor = GUI.color;
+                    var originalContentColor = GUI.contentColor;
 
-                try
-                {
-                    GUI.backgroundColor = currentStyle.BackgroundColor.Value;
-                    var lastRect = GUILayoutUtility.GetLastRect();
-                    GUI.Box(lastRect, "");
-                }
-                finally
-                {
-                    // 恢复原始颜色
-                    GUI.backgroundColor = originalBackgroundColor;
-                    GUI.color = originalColor;
-                    GUI.contentColor = originalContentColor;
+                    try
+                    {
+                        GUI.backgroundColor = currentStyle.BackgroundColor.Value;
+                        var lastRect = GUILayoutUtility.GetLastRect();
+                        GUI.Box(lastRect, "");
+                    }
+                    finally
+                    {
+                        // 恢复原始颜色
+                        GUI.backgroundColor = originalBackgroundColor;
+                        GUI.color = originalColor;
+                        GUI.contentColor = originalContentColor;
+                    }
                 }
             }
 

@@ -108,6 +108,16 @@ namespace DeclGUI.Components
         }
 
         /// <summary>
+        /// IStylefulElement 接口实现 - 设置样式
+        /// </summary>
+        /// <param name="style">新样式</param>
+        /// <returns>带样式的元素</returns>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
         /// 设置值范围
         /// </summary>
         /// <param name="min">最小值</param>

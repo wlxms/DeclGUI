@@ -179,7 +179,7 @@ DeclGUI 的上下文机制允许您在组件树中传递数据，类似于 React
 ### 提供上下文
 
 ```csharp
-var ui = new ContextBatch(new ReadOnly(true), new UserName("John")) {
+var ui = new ContextBatch(new DisableContext(true), new UserName("John")) {
     // 子元素可以消费这些上下文
     BuildUI()
 };
@@ -189,10 +189,10 @@ var ui = new ContextBatch(new ReadOnly(true), new UserName("John")) {
 
 ```csharp
 var ui = new ContextConsumer(context => {
-    bool isReadOnly = context.Get<ReadOnly>().Value;
+    bool isDisabled = context.Get<DisableContext>().Value;
     string userName = context.Get<UserName>().Value;
     
-    return new Label($"用户: {userName}, 只读: {isReadOnly}");
+    return new Label($"用户: {userName}, 已禁用: {isDisabled}");
 });
 ```
 

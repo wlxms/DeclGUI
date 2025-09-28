@@ -85,17 +85,27 @@ namespace DeclGUI.Components
 
 
         /// <summary>
-        /// 设置样式
-        /// </summary>
-        /// <param name="style">新样式</param>
-        /// <returns>带样式的开关组件</returns>
-        public Toggle WithStyle(IDeclStyle style)
-        {
-            return new Toggle(Value, OnValueChanged, style);
-        }
-        /// <summary>
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IStylefulElement 显式实现，返回 IStylefulElement
+        /// </summary>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
+        /// 便于链式调用的 WithStyle，返回 Toggle 类型
+        /// </summary>
+        public Toggle WithStyle(IDeclStyle style)
+        {
+            var newToggle = new Toggle(Value, OnValueChanged, style);
+            newToggle.Key = Key;
+            newToggle.Events = Events;
+            return newToggle;
+        }
     }
 }

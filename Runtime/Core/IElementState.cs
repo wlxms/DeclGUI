@@ -196,5 +196,33 @@ namespace DeclGUI.Core
         /// 获取当前状态的描述字符串（用于调试）
         /// </summary>
         string GetStateDescription();
+        
+        /// <summary>
+        /// 添加指定类型的元素状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <param name="state">状态实例</param>
+        void AddState<T>(T state);
+        
+        /// <summary>
+        /// 获取指定类型的元素状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <returns>状态实例，如果不存在则返回null</returns>
+        T GetState<T>();
+        
+        /// <summary>
+        /// 检查是否包含指定类型的状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <returns>如果包含指定类型的状态则返回true</returns>
+        bool HasState<T>();
+        
+        /// <summary>
+        /// 移除指定类型的状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <returns>如果成功移除则返回true</returns>
+        bool RemoveState<T>();
     }
 }

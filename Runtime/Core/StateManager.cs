@@ -8,13 +8,18 @@ namespace DeclGUI.Core
     /// 容器状态实现
     /// 负责管理容器内子元素的状态，包含类型安全检查
     /// </summary>
-    public class ContainerState : IStateManager
+    public class StateManager : IStateManager
     {
         // 修改状态存储字典使用 IElementState 接口
         private readonly Dictionary<string, IElementState> _stateStorage = new Dictionary<string, IElementState>();
         private readonly Dictionary<Type, int> _typeCounters = new Dictionary<Type, int>();
         private readonly Dictionary<string, int> _stateLastUsedFrame = new Dictionary<string, int>();
         private int _currentFrame = 0;
+        
+        /// <summary>
+        /// 元素状态初始化器
+        /// </summary>
+        private Action<IElementState> _elementStateInitializer;
 
         public IElementState GetOrCreateState(in IElementWithKey element)
         {
@@ -46,13 +51,14 @@ namespace DeclGUI.Core
                 // 如果元素是有状态的，使用元素自己的状态
                 var elementState = statefulElement.CreateState();
                 newState.State = elementState;
-                
+
                 // 更新状态标志（确保状态同步）
                 newState.UpdateStateFlags();
             }
 
             _stateStorage[key] = newState;
             _stateLastUsedFrame[key] = _currentFrame;
+            _elementStateInitializer?.Invoke(newState);
             return newState;
         }
 
@@ -62,7 +68,7 @@ namespace DeclGUI.Core
             if (_stateStorage.TryGetValue(key, out var existingState))
             {
                 existingState.State = state;
-                
+
                 // 更新状态标志（确保状态同步）
                 if (existingState is ElementState concreteState)
                 {
@@ -73,7 +79,7 @@ namespace DeclGUI.Core
             {
                 var newState = GetOrCreateState(element) as IElementState;
                 newState.State = state;
-                
+
                 // 更新状态标志（确保状态同步）
                 if (newState is ElementState concreteState)
                 {
@@ -129,7 +135,25 @@ namespace DeclGUI.Core
                 _stateLastUsedFrame.Remove(key);
             }
         }
+        
+        /// <summary>
+        /// 设置元素状态初始化器
+        /// </summary>
+        /// <param name="initializer">元素状态初始化器</param>
+        public void SetElementStateInitializer(Action<IElementState> initializer)
+        {
+            _elementStateInitializer = initializer;
+        }
 
+        /// <summary>
+        /// 获取元素状态初始化器
+        /// </summary>
+        /// <returns>元素状态初始化器</returns>
+        public Action<IElementState> GetElementStateInitializer()
+        {
+            return _elementStateInitializer;
+        }
+        
         /// <summary>
         /// 获取元素的唯一键
         /// 使用元素已分配的Key或生成类型+索引的组合键
@@ -139,7 +163,7 @@ namespace DeclGUI.Core
             var key = !string.IsNullOrEmpty(element.Key)
                 ? element.Key
                 : GenerateIndexedKey(element.GetType());
-
+    
             element.Key = key;
             return key;
         }

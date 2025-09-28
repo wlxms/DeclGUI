@@ -1,6 +1,7 @@
 using DeclGUI.Core;
 using DeclGUI.Components;
 using UnityEngine;
+using UnityEditor;
 
 namespace DeclGUI.Editor.Renderers
 {
@@ -16,26 +17,43 @@ namespace DeclGUI.Editor.Renderers
                 return;
 
             var currentStyle = styleParam ?? element.Style;
-            var style = editorMgr.ApplyStyle(currentStyle, null);
+            var backgroundColor = currentStyle?.BackgroundColor;
+            GUIStyle defaultStyle = null;
+            switch (element.BoxSkin)
+            {
+                case BoxSkin.HelpBox:
+                    defaultStyle = EditorStyles.helpBox;
+                    break;
+                case BoxSkin.Box:
+                    defaultStyle = GUI.skin.box;
+                    break;
+                default:
+                    defaultStyle = backgroundColor.HasValue ? GUI.skin.box : null;
+                    break;
+            }
+
+            var style = editorMgr.ApplyStyle(currentStyle, defaultStyle);
             var width = editorMgr.GetStyleWidth(currentStyle);
             var height = editorMgr.GetStyleHeight(currentStyle);
-
-            // 开始水平布局
-            if (width > 0 && height > 0)
+            using (DeclEditorGUI.BeginBackgroundColor(backgroundColor))
             {
-                GUILayout.BeginHorizontal(GUILayout.Width(width), GUILayout.Height(height));
-            }
-            else if (width > 0)
-            {
-                GUILayout.BeginHorizontal(GUILayout.Width(width));
-            }
-            else if (height > 0)
-            {
-                GUILayout.BeginHorizontal(GUILayout.Height(height));
-            }
-            else
-            {
-                GUILayout.BeginHorizontal();
+                // 开始水平布局
+                if (width > 0 && height > 0)
+                {
+                    GUILayout.BeginHorizontal(style, GUILayout.Width(width), GUILayout.Height(height));
+                }
+                else if (width > 0)
+                {
+                    GUILayout.BeginHorizontal(style, GUILayout.Width(width));
+                }
+                else if (height > 0)
+                {
+                    GUILayout.BeginHorizontal(style, GUILayout.Height(height));
+                }
+                else
+                {
+                    GUILayout.BeginHorizontal(style);
+                }
             }
 
             try
@@ -49,18 +67,6 @@ namespace DeclGUI.Editor.Renderers
             finally
             {
                 GUILayout.EndHorizontal();
-                // 如果有背景颜色，使用Box控件渲染背景
-                if (currentStyle?.BackgroundColor != null)
-                {
-                    var originalBackgroundColor = GUI.backgroundColor;
-                    GUI.backgroundColor = currentStyle.BackgroundColor.Value;
-
-                    // 获取布局区域并渲染背景
-                    var layoutRect = GUILayoutUtility.GetLastRect();
-                    GUI.Box(layoutRect, GUIContent.none);
-
-                    GUI.backgroundColor = originalBackgroundColor;
-                }
             }
         }
 

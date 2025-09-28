@@ -38,6 +38,11 @@ namespace DeclGUI.Core
         /// 获取样式内容的哈希码
         /// </summary>
         int GetContentHashCode();
+        
+        /// <summary>
+        /// 获取样式内容的哈希码（包含主题属性值）
+        /// </summary>
+        int GetContentHashCode(DeclTheme theme);
 
         // IEquatable<IDeclStyle>.Equals(IDeclStyle other) 由接口继承，无需重复声明
     }

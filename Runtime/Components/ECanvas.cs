@@ -18,11 +18,21 @@ namespace DeclGUI.Components
         private IElement[] _elements;
         private int _count;
         private int _capacity;
+        private BoxSkin _boxSkin;
 
         /// <summary>
         /// 画布样式
         /// </summary>
         public IDeclStyle Style { get; }
+        
+        /// <summary>
+        /// 盒模型皮肤样式
+        /// </summary>
+        public BoxSkin BoxSkin
+        {
+            get => _boxSkin;
+            private set => _boxSkin = value;
+        }
 
         /// <summary>
         /// 事件注册结构
@@ -38,7 +48,16 @@ namespace DeclGUI.Components
         /// 构造函数 - 使用参数数组
         /// </summary>
         /// <param name="children">子元素</param>
-        public ECanvas(params IElement[] children)
+        public ECanvas(params IElement[] children) : this(BoxSkin.Auto, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素</param>
+        public ECanvas(BoxSkin boxSkin, params IElement[] children)
         {
             Key = null;
             _elements = null;
@@ -46,6 +65,7 @@ namespace DeclGUI.Components
             _capacity = 0;
             Style = null;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null && children.Length > 0)
             {
@@ -62,7 +82,17 @@ namespace DeclGUI.Components
         /// </summary>
         /// <param name="style">样式</param>
         /// <param name="children">子元素</param>
-        public ECanvas(IDeclStyle style, params IElement[] children) : this(children)
+        public ECanvas(IDeclStyle style, params IElement[] children) : this(BoxSkin.Auto, style, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、样式和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="style">样式</param>
+        /// <param name="children">子元素</param>
+        public ECanvas(BoxSkin boxSkin, IDeclStyle style, params IElement[] children) : this(boxSkin, children)
         {
             Style = style;
         }
@@ -72,7 +102,17 @@ namespace DeclGUI.Components
         /// </summary>
         /// <param name="children">子元素集合</param>
         /// <param name="style">样式</param>
-        public ECanvas(IEnumerable<IElement> children, IDeclStyle style = null)
+        public ECanvas(IEnumerable<IElement> children, IDeclStyle style = null) : this(BoxSkin.Auto, children, style)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、集合和样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素集合</param>
+        /// <param name="style">样式</param>
+        public ECanvas(BoxSkin boxSkin, IEnumerable<IElement> children, IDeclStyle style = null)
         {
             Key = null;
             _elements = null;
@@ -80,6 +120,7 @@ namespace DeclGUI.Components
             _capacity = 0;
             Style = style;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null)
             {
@@ -158,5 +199,41 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IStylefulElement 接口实现 - 设置样式
+        /// </summary>
+        /// <param name="style">新样式</param>
+        /// <returns>带样式的元素</returns>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            // 获取当前ECanvas中的元素数组并创建新的ECanvas实例
+            var elements = new IElement[_count];
+            for (int i = 0; i < _count; i++)
+            {
+                elements[i] = _elements[i];
+            }
+            return new ECanvas(_boxSkin, style, elements);
+        }
+        
+        /// <summary>
+        /// 设置盒模型皮肤样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <returns>带有新盒模型皮肤的ECanvas实例</returns>
+        public ECanvas WithBoxSkin(BoxSkin boxSkin)
+        {
+            var newECanvas = new ECanvas(boxSkin, Style);
+            newECanvas.Key = Key;
+            newECanvas.Events = Events;
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newECanvas.Add(_elements[i]);
+                }
+            }
+            return newECanvas;
+        }
     }
 }

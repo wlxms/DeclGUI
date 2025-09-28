@@ -345,20 +345,61 @@ namespace DeclGUI.Core
             unchecked
             {
                 int hash = 17;
-                hash = hash * 23 + (_color.GetHashCode());
-                hash = hash * 23 + (_width.GetHashCode());
-                hash = hash * 23 + (_height.GetHashCode());
+                hash = hash * 23 + _color.GetContentHashCode();
+                hash = hash * 23 + _width.GetContentHashCode();
+                hash = hash * 23 + _height.GetContentHashCode();
                 hash = hash * 23 + (_styleSetId.Value?.GetHashCode() ?? 0);
-                hash = hash * 23 + (_backgroundColor.GetHashCode());
-                hash = hash * 23 + (_borderColor.GetHashCode());
-                hash = hash * 23 + (_padding.GetHashCode());
-                hash = hash * 23 + (_margin.GetHashCode());
-                hash = hash * 23 + (_fontSize.GetHashCode());
-                hash = hash * 23 + (_fontStyle.GetHashCode());
-                hash = hash * 23 + (_alignment.GetHashCode());
-                hash = hash * 23 + (_borderWidth.GetHashCode());
-                hash = hash * 23 + (_borderRadius.GetHashCode());
+                hash = hash * 23 + _backgroundColor.GetContentHashCode();
+                hash = hash * 23 + _borderColor.GetContentHashCode();
+                hash = hash * 23 + _padding.GetContentHashCode();
+                hash = hash * 23 + _margin.GetContentHashCode();
+                hash = hash * 23 + _fontSize.GetContentHashCode();
+                hash = hash * 23 + _fontStyle.GetContentHashCode();
+                hash = hash * 23 + _alignment.GetContentHashCode();
+                hash = hash * 23 + _borderWidth.GetContentHashCode();
+                hash = hash * 23 + _borderRadius.GetContentHashCode();
                 return hash;
+            }
+        }
+        
+        public int GetContentHashCode(DeclTheme theme)
+        {
+            unchecked
+            {
+                int hash = 17;
+                // 计算包含主题属性值的哈希码
+                hash = hash * 23 + GetPropertyHashCode(_color, theme);
+                hash = hash * 23 + GetPropertyHashCode(_width, theme);
+                hash = hash * 23 + GetPropertyHashCode(_height, theme);
+                hash = hash * 23 + (_styleSetId.Value?.GetHashCode() ?? 0);
+                hash = hash * 23 + GetPropertyHashCode(_backgroundColor, theme);
+                hash = hash * 23 + GetPropertyHashCode(_borderColor, theme);
+                hash = hash * 23 + GetPropertyHashCode(_padding, theme);
+                hash = hash * 23 + GetPropertyHashCode(_margin, theme);
+                hash = hash * 23 + GetPropertyHashCode(_fontSize, theme);
+                hash = hash * 23 + GetPropertyHashCode(_fontStyle, theme);
+                hash = hash * 23 + GetPropertyHashCode(_alignment, theme);
+                hash = hash * 23 + GetPropertyHashCode(_borderWidth, theme);
+                hash = hash * 23 + GetPropertyHashCode(_borderRadius, theme);
+                return hash;
+            }
+        }
+        
+        /// <summary>
+        /// 计算属性的哈希码（考虑主题中的引用值）
+        /// </summary>
+        private int GetPropertyHashCode<T>(StyleProperty<T> property, DeclTheme theme)
+        {
+            if (property.IsPropertyRef && theme != null)
+            {
+                // 如果是属性引用，获取主题中的实际值来计算哈希
+                var value = property.GetValue(theme);
+                return value?.GetHashCode() ?? 0;
+            }
+            else
+            {
+                // 否则使用属性本身的哈希值
+                return property.GetContentHashCode();
             }
         }
 

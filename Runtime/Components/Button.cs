@@ -21,7 +21,7 @@ namespace DeclGUI.Components
         /// <summary>
         /// 按钮样式
         /// </summary>
-        public DeclStyle? Style { get; }
+        public IDeclStyle? Style { get; }
 
         /// <summary>
         /// 事件注册器
@@ -34,7 +34,7 @@ namespace DeclGUI.Components
         /// <param name="text">按钮文本</param>
         /// <param name="onClick">点击事件</param>
         /// <param name="style">样式</param>
-        public Button(string text, Action onClick, DeclStyle? style = null)
+        public Button(string text, Action onClick, IDeclStyle? style = null)
         {
             this = default; // 先初始化所有字段为默认值
             Key = null;
@@ -57,7 +57,7 @@ namespace DeclGUI.Components
         /// <param name="text">按钮文本</param>
         /// <param name="events">事件注册器</param>
         /// <param name="style">样式</param>
-        public Button(string text, DeclEvent events = default, DeclStyle? style = null)
+        public Button(string text, DeclEvent events = default, IDeclStyle? style = null)
         {
             this = default; // 先初始化所有字段为默认值
             Key = null;
@@ -99,5 +99,23 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IStylefulElement 显式实现，返回 IStylefulElement
+        /// </summary>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
+        /// 便于链式调用的 WithStyle，返回 Button 类型
+        /// </summary>
+        public Button WithStyle(IDeclStyle style)
+        {
+            var newBtn = new Button(Text, Events, style);
+            newBtn.Key = Key;
+            return newBtn;
+        }
     }
 }

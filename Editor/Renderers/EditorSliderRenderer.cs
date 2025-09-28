@@ -60,13 +60,28 @@ namespace DeclGUI.Editor.Renderers
                     GUI.contentColor = currentStyle.Color.Value;
                 }
 
-                // 渲染滑块
-                var newValue = EditorGUILayout.Slider(
-                    element.Value,
-                    element.MinValue,
-                    element.MaxValue,
-                    GUILayout.Width(width > 0 ? width : 200)
-                );
+                var newValue = element.Value;
+
+                if(width > 0)
+                {
+                    // 渲染滑块
+                    newValue = EditorGUILayout.Slider(
+                        element.Value,
+                        element.MinValue,
+                        element.MaxValue,
+                        GUILayout.Width(width)
+                    );
+                }
+                else
+                {
+                    // 渲染滑块
+                    newValue = EditorGUILayout.Slider(
+                        element.Value,
+                        element.MinValue,
+                        element.MaxValue
+                    );
+                }
+
 
                 // 检查值是否变化并触发回调
                 if (!Mathf.Approximately(newValue, element.Value) && element.OnValueChanged != null)

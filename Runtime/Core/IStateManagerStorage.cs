@@ -40,7 +40,9 @@ namespace DeclGUI.Core
         /// 生成容器状态的键（类型+索引的组合键）
         /// </summary>
         string GenerateContainerStateKey(Type containerType);
-        
+
         void ResetAndCleanupUnuseState(int frameThreshold);
+        
+        Action<IElementState> OnElementStateCreated { get; set; }
     }
 }

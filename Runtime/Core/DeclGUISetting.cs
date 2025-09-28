@@ -48,7 +48,7 @@ namespace DeclGUI.Core
                     }
                     _instance.CollectAllThemes();
                     _instance.BuildStyleSetToThemeMap();
-                    if (_instance.DefaultTheme)
+                    if (!_instance.DefaultTheme)
                     {
                         if (_instance.themes.Count > 0)
                             _instance.DefaultTheme = _instance.themes.values.First();

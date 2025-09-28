@@ -15,15 +15,43 @@ namespace DeclGUI.Components.Advanced
     /// </summary>
     public struct Panel : IContainerElement, IEventfulElement, IStylefulElement
     {
+        /// <summary>
+        /// IStylefulElement 显式实现，返回 IStylefulElement
+        /// </summary>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
+        /// 便于链式调用的 WithStyle，返回 Panel 类型
+        /// </summary>
+        public Panel WithStyle(IDeclStyle style)
+        {
+            var newPanel = new Panel(_boxSkin, style, _elements?.Take(_count).ToArray() ?? Array.Empty<IElement>());
+            newPanel.Key = Key;
+            newPanel.Events = Events;
+            return newPanel;
+        }
         public string Key { get; set; }
         private IElement[] _elements;
         private int _count;
         private int _capacity;
+        private BoxSkin _boxSkin;
 
         /// <summary>
         /// Panel样式
         /// </summary>
         public IDeclStyle Style { get; }
+        
+        /// <summary>
+        /// 盒模型皮肤样式
+        /// </summary>
+        public BoxSkin BoxSkin
+        {
+            get => _boxSkin;
+            private set => _boxSkin = value;
+        }
 
         /// <summary>
         /// 事件注册结构
@@ -39,7 +67,16 @@ namespace DeclGUI.Components.Advanced
         /// 构造函数 - 使用参数数组
         /// </summary>
         /// <param name="children">子元素</param>
-        public Panel(params IElement[] children)
+        public Panel(params IElement[] children) : this(BoxSkin.Auto, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素</param>
+        public Panel(BoxSkin boxSkin, params IElement[] children)
         {
             Key = null;
             _elements = null;
@@ -47,6 +84,7 @@ namespace DeclGUI.Components.Advanced
             _capacity = 0;
             Style = null;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null && children.Length > 0)
             {
@@ -63,7 +101,17 @@ namespace DeclGUI.Components.Advanced
         /// </summary>
         /// <param name="style">样式</param>
         /// <param name="children">子元素</param>
-        public Panel(IDeclStyle style, params IElement[] children) : this(children)
+        public Panel(IDeclStyle style, params IElement[] children) : this(BoxSkin.Auto, style, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、样式和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="style">样式</param>
+        /// <param name="children">子元素</param>
+        public Panel(BoxSkin boxSkin, IDeclStyle style, params IElement[] children) : this(boxSkin, children)
         {
             Style = style;
         }
@@ -73,7 +121,17 @@ namespace DeclGUI.Components.Advanced
         /// </summary>
         /// <param name="children">子元素集合</param>
         /// <param name="style">样式</param>
-        public Panel(IEnumerable<IElement> children, IDeclStyle style = null)
+        public Panel(IEnumerable<IElement> children, IDeclStyle style = null) : this(BoxSkin.Auto, children, style)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、集合和样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素集合</param>
+        /// <param name="style">样式</param>
+        public Panel(BoxSkin boxSkin, IEnumerable<IElement> children, IDeclStyle style = null)
         {
             Key = null;
             _elements = null;
@@ -81,6 +139,7 @@ namespace DeclGUI.Components.Advanced
             _capacity = 0;
             Style = style;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null)
             {
@@ -174,6 +233,26 @@ namespace DeclGUI.Components.Advanced
             var events = Events;
             events.SetHandler(eventType, null);
             Events = events;
+        }
+        
+        /// <summary>
+        /// 设置盒模型皮肤样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <returns>带有新盒模型皮肤的Panel实例</returns>
+        public Panel WithBoxSkin(BoxSkin boxSkin)
+        {
+            var newPanel = new Panel(boxSkin, Style);
+            newPanel.Key = Key;
+            newPanel.Events = Events;
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newPanel.Add(_elements[i]);
+                }
+            }
+            return newPanel;
         }
 
         /// <summary>

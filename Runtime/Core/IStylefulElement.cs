@@ -9,5 +9,7 @@ namespace DeclGUI.Core
         /// 元素样式
         /// </summary>
         IDeclStyle Style { get; }
+
+        IStylefulElement WithStyle(IDeclStyle style);
     }
 }

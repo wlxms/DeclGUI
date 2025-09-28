@@ -50,13 +50,27 @@ namespace DeclGUI.Editor.Renderers
                 // 确保选中索引在有效范围内
                 var selectedIndex = Mathf.Clamp(element.SelectedIndex, 0, options.Length - 1);
 
-                // 渲染下拉选择框
-                var newIndex = EditorGUILayout.Popup(
-                    selectedIndex,
-                    options,
-                    style,
-                    GUILayout.Width(width > 0 ? width : 120)
-                );
+                var newIndex = selectedIndex;
+
+                if (width > 0)
+                {
+                    // 渲染下拉选择框
+                    newIndex = EditorGUILayout.Popup(
+                        selectedIndex,
+                        options,
+                        style,
+                        GUILayout.Width(width)
+                    );
+                }
+                else
+                {
+                    // 渲染下拉选择框
+                    newIndex = EditorGUILayout.Popup(
+                        selectedIndex,
+                        options,
+                        style
+                    );
+                }
 
                 // 检查选择是否变化并触发回调
                 if (newIndex != element.SelectedIndex && element.OnSelectionChanged != null)

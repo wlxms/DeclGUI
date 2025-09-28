@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace DeclGUI.Core
@@ -158,6 +159,9 @@ namespace DeclGUI.Core
         /// 当前元素状态标志（组合状态）
         /// </summary>
         public ElementStateFlags CurrentStateFlags { get; private set; }
+        
+        // 用于存储泛型状态的字典
+        private readonly Dictionary<System.Type, object> _genericStates = new System.Collections.Generic.Dictionary<System.Type, object>();
         
         /// <summary>
         /// 默认构造函数
@@ -330,6 +334,54 @@ namespace DeclGUI.Core
             if (HasState(ElementStateFlags.Selected)) states.Add("Selected");
             
             return states.Count > 0 ? string.Join(" + ", states) : "Normal";
+        }
+        
+        /// <summary>
+        /// 添加指定类型的元素状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <param name="state">状态实例</param>
+        public void AddState<T>(T state)
+        {
+            System.Type type = typeof(T);
+            _genericStates[type] = state;
+        }
+        
+        /// <summary>
+        /// 获取指定类型的元素状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <returns>状态实例，如果不存在则返回null</returns>
+        public T GetState<T>()
+        {
+            System.Type type = typeof(T);
+            if (_genericStates.TryGetValue(type, out object state))
+            {
+                return (T)state;
+            }
+            return default(T);
+        }
+        
+        /// <summary>
+        /// 检查是否包含指定类型的状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <returns>如果包含指定类型的状态则返回true</returns>
+        public bool HasState<T>()
+        {
+            System.Type type = typeof(T);
+            return _genericStates.ContainsKey(type);
+        }
+        
+        /// <summary>
+        /// 移除指定类型的状态
+        /// </summary>
+        /// <typeparam name="T">状态类型</typeparam>
+        /// <returns>如果成功移除则返回true</returns>
+        public bool RemoveState<T>()
+        {
+            System.Type type = typeof(T);
+            return _genericStates.Remove(type);
         }
     }
 }

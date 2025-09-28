@@ -14,15 +14,25 @@ namespace DeclGUI.Components
     public struct Ver : IContainerElement, IEventfulElement, IStylefulElement
     {
         public string Key { get; set; }
-        public ContainerState State { get; set; }
+        public StateManager State { get; set; }
         private IElement[] _elements;
         private int _count;
         private int _capacity;
+        private BoxSkin _boxSkin;
 
         /// <summary>
         /// 布局样式
         /// </summary>
         public IDeclStyle Style { get; }
+        
+        /// <summary>
+        /// 盒模型皮肤样式
+        /// </summary>
+        public BoxSkin BoxSkin
+        {
+            get => _boxSkin;
+            private set => _boxSkin = value;
+        }
 
         /// <summary>
         /// 事件注册结构
@@ -38,7 +48,16 @@ namespace DeclGUI.Components
         /// 构造函数 - 使用参数数组
         /// </summary>
         /// <param name="children">子元素</param>
-        public Ver(params IElement[] children)
+        public Ver(params IElement[] children) : this(BoxSkin.Auto, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素</param>
+        public Ver(BoxSkin boxSkin, params IElement[] children)
         {
             Key = null;
             State = null;
@@ -47,6 +66,7 @@ namespace DeclGUI.Components
             _capacity = 0;
             Style = null;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null && children.Length > 0)
             {
@@ -63,7 +83,17 @@ namespace DeclGUI.Components
         /// </summary>
         /// <param name="style">样式</param>
         /// <param name="children">子元素</param>
-        public Ver(IDeclStyle style, params IElement[] children) : this(children)
+        public Ver(IDeclStyle style, params IElement[] children) : this(BoxSkin.Auto, style, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、样式和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="style">样式</param>
+        /// <param name="children">子元素</param>
+        public Ver(BoxSkin boxSkin, IDeclStyle style, params IElement[] children) : this(boxSkin, children)
         {
             Style = style;
         }
@@ -73,7 +103,17 @@ namespace DeclGUI.Components
         /// </summary>
         /// <param name="children">子元素集合</param>
         /// <param name="style">样式</param>
-        public Ver(IEnumerable<IElement> children, IDeclStyle style = null)
+        public Ver(IEnumerable<IElement> children, IDeclStyle style = null) : this(BoxSkin.Auto, children, style)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、集合和样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素集合</param>
+        /// <param name="style">样式</param>
+        public Ver(BoxSkin boxSkin, IEnumerable<IElement> children, IDeclStyle style = null)
         {
             Key = null;
             State = null;
@@ -82,6 +122,7 @@ namespace DeclGUI.Components
             _capacity = 0;
             Style = style;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null)
             {
@@ -109,13 +150,13 @@ namespace DeclGUI.Components
         /// <summary>
         /// 创建容器状态
         /// </summary>
-        public ContainerState CreateState() => new ContainerState();
+        public StateManager CreateState() => new StateManager();
 
         /// <summary>
         /// 渲染方法，返回自身
         /// </summary>
         /// <returns>当前垂直布局实例</returns>
-        public IElement Render(ContainerState state) => this;
+        public IElement Render(StateManager state) => this;
         
         /// <summary>
         /// 渲染方法（无状态参数）
@@ -172,5 +213,53 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IStylefulElement 显式实现，返回 IStylefulElement
+        /// </summary>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
+        /// 便于链式调用的 WithStyle，返回 Ver 类型
+        /// </summary>
+        public Ver WithStyle(IDeclStyle style)
+        {
+            var newVer = new Ver(_boxSkin, style);
+            newVer.Key = Key;
+            newVer.State = State;
+            newVer.Events = Events;
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newVer.Add(_elements[i]);
+                }
+            }
+            return newVer;
+        }
+        
+        /// <summary>
+        /// 设置盒模型皮肤样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <returns>带有新盒模型皮肤的Ver实例</returns>
+        public Ver WithBoxSkin(BoxSkin boxSkin)
+        {
+            var newVer = new Ver(boxSkin, Style);
+            newVer.Key = Key;
+            newVer.State = State;
+            newVer.Events = Events;
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newVer.Add(_elements[i]);
+                }
+            }
+            return newVer;
+        }
     }
 }

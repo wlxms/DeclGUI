@@ -219,7 +219,7 @@ namespace DeclGUI.Editor.Renderers
             RegisterRenderer<Ver>(new EditorVerRenderer());
             RegisterRenderer<Spc>(new EditorSpcRenderer());
             RegisterRenderer<TextField>(new EditorTextFieldRenderer());
-            
+
             // 注册新组件渲染器
             RegisterRenderer<FixableSpace>(new EditorFixableSpaceRenderer());
             RegisterRenderer<Slider>(new EditorSliderRenderer());
@@ -236,22 +236,31 @@ namespace DeclGUI.Editor.Renderers
             RegisterRenderer<MinMaxSlider>(new EditorMinMaxSliderRenderer());
             RegisterRenderer<LayerField>(new EditorLayerFieldRenderer());
             RegisterRenderer<TagField>(new EditorTagFieldRenderer());
-            
+
             // 注册ObjectField渲染器（处理所有ObjectField<T>类型）
             RegisterRenderer(typeof(DeclGUI.Components.ObjectField<>), new EditorObjectFieldRenderer());
-            
+
+            // 注册非泛型ObjectField渲染器
+            RegisterRenderer<ObjectField>(new EditorNonGenericObjectFieldRenderer());
+
             // 注册新布局组件渲染器
             RegisterRenderer<ECanvas>(new EditorECanvasRenderer());
             RegisterRenderer<AbsolutePanel>(new EditorAbsolutePanelRenderer());
-            
+
             // 注册有状态组件渲染器
             RegisterRenderer<StatefulButton>(new EditorStatefulButtonRenderer());
             RegisterRenderer<LongPressButton>(new EditorLongPressButtonRenderer());
-            
+
             // 注册DisableGroup渲染器
             RegisterRenderer<DisableGroup>(new DisableGroupRenderer());
+            // 注册FoldoutGroup渲染器
+            RegisterRenderer<FoldoutGroup>(new EditorFoldoutGroupRenderer());
+            RegisterRenderer<FoldoutHeaderGroup>(new EditorFoldoutHeaderGroupRenderer());
+            
+            // 注册Image渲染器
+            RegisterRenderer<Image>(new EditorImageRenderer());
         }
-        
+
         /// <summary>
         /// 应用样式到GUI
         /// </summary>
@@ -269,12 +278,12 @@ namespace DeclGUI.Editor.Renderers
             // 从对象池获取或创建GUIStyle
             // var guiStyle = _guiStylePool.GetOrCreateStyle(cacheKey, defaultStyle ?? GUI.skin.label);
             var existingStyle = _guiStylePool.GetExistedStyle(cacheKey);
-            if(existingStyle != null)
+            if (existingStyle != null)
                 return existingStyle;
-            
+
             // 如果没有找到，创建新的GUIStyle
             var guiStyle = _guiStylePool.GetPoolStyle(cacheKey, defaultStyle ?? GUI.skin.label);
-            
+
             // 使用IDeclStyle接口的方法获取样式属性
             var color = style.Color;
             var backgroundColor = style.BackgroundColor;
@@ -286,7 +295,7 @@ namespace DeclGUI.Editor.Renderers
             var margin = style.Margin;
             var borderWidth = style.BorderWidth;  // 新增：边框宽度
             var borderRadius = style.BorderRadius;  // 新增：圆角半径
-            
+
             // 重置样式属性为默认值
             var defaultStyleToUse = defaultStyle ?? GUI.skin.label;
             guiStyle.normal = defaultStyleToUse.normal;
@@ -313,7 +322,7 @@ namespace DeclGUI.Editor.Renderers
             guiStyle.fixedHeight = defaultStyleToUse.fixedHeight;
             guiStyle.stretchWidth = defaultStyleToUse.stretchWidth;
             guiStyle.stretchHeight = defaultStyleToUse.stretchHeight;
-            
+
             // 应用边框宽度到GUIStyle的border属性
             if (borderWidth != null && borderWidth > 0)
             {
@@ -326,7 +335,7 @@ namespace DeclGUI.Editor.Renderers
                     borderWidthValue
                 );
             }
-            
+
             // 应用所有样式属性
             if (color != null)
             {
@@ -335,7 +344,7 @@ namespace DeclGUI.Editor.Renderers
                 guiStyle.active.textColor = color.Value;
                 guiStyle.focused.textColor = color.Value;
             }
-            
+
             // 不再设置背景纹理以避免性能问题
             // 如果需要背景色，应在渲染器中使用GUI.backgroundColor处理
             // if (backgroundColor != null)
@@ -346,37 +355,37 @@ namespace DeclGUI.Editor.Renderers
             //     guiStyle.active.background = bgTexture;
             //     guiStyle.focused.background = bgTexture;
             // }
-        
-            
+
+
             if (fontSize != null && fontSize > 0)
             {
                 guiStyle.fontSize = fontSize.Value;
             }
-            
+
             if (fontStyle != null && fontStyle != FontStyle.Normal)
             {
                 guiStyle.fontStyle = fontStyle.Value;
             }
-            
+
             if (alignment != null && alignment != TextAnchor.UpperLeft)
             {
                 guiStyle.alignment = alignment.Value;
             }
-            
+
             if (padding != null)
             {
                 guiStyle.padding = padding;
             }
-            
+
             if (margin != null)
             {
                 guiStyle.margin = margin;
             }
-            
+
             return guiStyle;
         }
-    
-        
+
+
         /// <summary>
         /// 创建或获取纹理（缓存纹理以避免重复创建）
         /// </summary>
@@ -384,7 +393,7 @@ namespace DeclGUI.Editor.Renderers
         {
             return _guiStylePool.GetOrCreateColorTexture(color, borderWidth, borderRadius);
         }
-        
+
         /// <summary>
         /// 清理缓存（在每帧渲染结束后调用）
         /// </summary>
@@ -392,7 +401,7 @@ namespace DeclGUI.Editor.Renderers
         {
             _guiStylePool.Clear();
         }
-        
+
         /// <summary>
         /// 获取样式宽度
         /// </summary>
@@ -402,7 +411,7 @@ namespace DeclGUI.Editor.Renderers
         {
             return style?.Width ?? 0;
         }
-        
+
         /// <summary>
         /// 获取样式高度
         /// </summary>
@@ -443,10 +452,10 @@ namespace DeclGUI.Editor.Renderers
             {
                 normal = { background = MakeTex(2, 2, new Color(1f, 0.9f, 0.9f)) } // 浅红色背景
             });
-            
+
             // 使用深红色显示标题
             GUILayout.Label($"<color=#CC000>⚠️ Render Error: {elementType}</color>", boldErrorStyle);
-            
+
             // 使用深红色显示错误消息
             GUILayout.Label($"<color=#CC000>Error: {exception.Message}</color>", errorStyle);
 
@@ -472,7 +481,7 @@ namespace DeclGUI.Editor.Renderers
             Color[] pix = new Color[width * height];
             for (int i = 0; i < pix.Length; i++)
                 pix[i] = col;
-            
+
             Texture2D result = new Texture2D(width, height);
             result.SetPixels(pix);
             result.Apply();
@@ -488,7 +497,7 @@ namespace DeclGUI.Editor.Renderers
         {
             RenderFallbackStatic(exception, element);
         }
-        
+
         /// <summary>
         /// 获取元素的屏幕区域
         /// Editor环境下的实现，需要根据GUI布局计算元素位置
@@ -499,18 +508,25 @@ namespace DeclGUI.Editor.Renderers
         {
             // 在Editor环境下，元素位置检测需要渲染器提供
             // 这里使用一个简化的实现，实际项目中需要更精确的位置计算
-            
+
             // 使用基类的GetRenderer方法获取渲染器
             var renderer = GetRenderer(element);
-            
+
             // 如果渲染器实现了提供位置的方法
             if (renderer is IElementRectProvider rectProvider)
             {
                 return rectProvider.GetElementRect();
             }
-            
+
             // 默认返回空矩形（需要渲染器具体实现）
             return new Rect();
         }
+
+        protected override void OnElementStateCreated(IElementState elementState)
+        {
+            base.OnElementStateCreated(elementState);
+            elementState.AddState(new EditorElementState());
+        }
+
     }
 }

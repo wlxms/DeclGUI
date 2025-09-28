@@ -17,6 +17,15 @@ namespace DeclGUI.Components
         /// 面板位置
         /// </summary>
         public Vector2 Position { get; }
+            /// <summary>
+            /// 设置面板样式，返回新实例
+            /// </summary>
+        public AbsolutePanel WithStyle(DeclStyle style)
+        {
+            var panel = new AbsolutePanel(Position, Child, style, MinWidth, MinHeight, MaxWidth, MaxHeight);
+            panel.Events = Events;
+            return panel;
+        }
 
         /// <summary>
         /// 子元素

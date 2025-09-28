@@ -177,7 +177,7 @@ new LongPressButton("长按2秒", OnLongPress, 2.0f)
 **示例：**
 ```csharp
 new ContextBatch(
-    new ReadOnly(true, childElement),
+    new DisableContext(true, childElement),
     new UserName("John", childElement)
 )
 ```
@@ -191,10 +191,10 @@ new ContextBatch(
 **示例：**
 ```csharp
 new ContextConsumer(context => {
-    bool isReadOnly = context.Get<ReadOnly>().Value;
+    bool isDisabled = context.Get<DisableContext>().Value;
     string userName = context.Get<UserName>().Value;
     
-    return new Label($"Hello {userName}, ReadOnly: {isReadOnly}");
+    return new Label($"Hello {userName}, Disabled: {isDisabled}");
 })
 ```
 
@@ -210,7 +210,7 @@ new ContextConsumer(context => {
 **示例：**
 ```csharp
 new ECanvas(
-    new AbsolutePanel(new Vector2(100, 50), 
+    new AbsolutePanel(new Vector2(100, 50),
         new Button("固定位置按钮", OnButtonClick)
     )
 )
@@ -230,7 +230,7 @@ new ECanvas(
 
 **示例：**
 ```csharp
-new AbsolutePanel(new Vector2(100, 50), 
+new AbsolutePanel(new Vector2(100, 50),
     new Button("固定位置按钮", OnButtonClick)
 )
 ```
@@ -260,6 +260,18 @@ new FixableSpace()
 **示例：**
 ```csharp
 new ScrollRect(scrollPosition, content, OnScrollChanged)
+```
+
+### Panel（面板组件）
+高级布局面板组件，位于Advanced文件夹中。
+
+**参数：**
+- `children` (params IElement[]): 子元素
+- `style` (DeclStyle?): 样式设置
+
+**示例：**
+```csharp
+new Panel(DeclStyle.WithColor(Color.gray), child1, child2)
 ```
 
 ## 输入字段组件
@@ -427,16 +439,28 @@ new CurveField(AnimationCurve.Linear(0, 0, 1, 1), OnCurveChanged)
 
 ## 其他组件
 
-### ReadOnly（只读上下文）
-提供只读状态的上下文组件。
+### DisableContext（禁用上下文）
+提供禁用状态的上下文组件。
 
 **参数：**
-- `value` (bool): 只读状态
+- `value` (bool): 禁用状态
 - `child` (IElement): 子元素
 
 **示例：**
 ```csharp
-new ReadOnly(true, childElement)
+new DisableContext(true, childElement)
+```
+
+### DisableGroup（禁用组）
+用于将禁用状态应用到一组组件。
+
+**参数：**
+- `disabled` (bool): 禁用状态
+- `children` (params IElement[]): 子元素
+
+**示例：**
+```csharp
+new DisableGroup(true, new Label("被禁用的元素"))
 ```
 
 ### UserName（用户名上下文）

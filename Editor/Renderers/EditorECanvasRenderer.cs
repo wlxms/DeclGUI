@@ -1,6 +1,7 @@
 using DeclGUI.Core;
 using DeclGUI.Components;
 using UnityEngine;
+using UnityEditor;
 
 namespace DeclGUI.Editor.Renderers
 {
@@ -17,7 +18,10 @@ namespace DeclGUI.Editor.Renderers
                 return;
 
             var currentStyle = styleParam ?? element.Style;
-            var style = editorMgr.ApplyStyle(currentStyle, null);
+            var backgroundColor = currentStyle?.BackgroundColor;
+            var defaultStyle = backgroundColor.HasValue ? element.BoxSkin == BoxSkin.Box ? GUI.skin.box : EditorStyles.helpBox : null;
+
+            var style = editorMgr.ApplyStyle(currentStyle, defaultStyle);
             var width = editorMgr.GetStyleWidth(currentStyle);
             var height = editorMgr.GetStyleHeight(currentStyle);
 
@@ -25,28 +29,31 @@ namespace DeclGUI.Editor.Renderers
             var matrix = GUI.matrix;
             var color = GUI.color;
 
-            GUILayout.BeginScrollView(Vector2.zero);
+            using (DeclEditorGUI.BeginBackgroundColor(backgroundColor))
+            {
+                GUILayout.BeginScrollView(Vector2.zero);
 
-            // 画布本身参与自动布局
-            if (width > 0 && height > 0)
-            {
-                GUILayout.BeginVertical(style, GUILayout.Width(width), GUILayout.Height(height));
+                // 画布本身参与自动布局
+                if (width > 0 && height > 0)
+                {
+                    GUILayout.BeginVertical(style, GUILayout.Width(width), GUILayout.Height(height));
+                }
+                else if (width > 0)
+                {
+                    GUILayout.BeginVertical(style, GUILayout.Width(width));
+                }
+                else if (height > 0)
+                {
+                    GUILayout.BeginVertical(style, GUILayout.Height(height));
+                }
+                else
+                {
+                    GUILayout.BeginVertical(style);
+                }
+                GUILayout.BeginHorizontal();
+                GUILayout.FlexibleSpace();
+                GUILayout.EndHorizontal();
             }
-            else if (width > 0)
-            {
-                GUILayout.BeginVertical(style, GUILayout.Width(width));
-            }
-            else if (height > 0)
-            {
-                GUILayout.BeginVertical(style, GUILayout.Height(height));
-            }
-            else
-            {
-                GUILayout.BeginVertical(style);
-            }
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
 
             // 在绝对定位区域内渲染子元素
             foreach (var child in element)

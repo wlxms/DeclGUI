@@ -18,6 +18,7 @@ namespace DeclGUI.Components
         private IElement[] _elements;
         private int _count;
         private int _capacity;
+        private BoxSkin _boxSkin;
 
         /// <summary>
         /// 事件注册器
@@ -48,6 +49,15 @@ namespace DeclGUI.Components
         /// 样式
         /// </summary>
         public IDeclStyle Style { get; }
+        
+        /// <summary>
+        /// 盒模型皮肤样式
+        /// </summary>
+        public BoxSkin BoxSkin
+        {
+            get => _boxSkin;
+            private set => _boxSkin = value;
+        }
 
         /// <summary>
         /// 元素数量
@@ -67,6 +77,24 @@ namespace DeclGUI.Components
                          System.Action<Vector2> onScroll = null,
                          bool alwaysShowVertical = false, bool alwaysShowHorizontal = false,
                          IDeclStyle style = null,
+                         params IElement[] children) : this(BoxSkin.Auto, scrollPosition, onScroll, alwaysShowVertical, alwaysShowHorizontal, style, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="scrollPosition">滚动位置</param>
+        /// <param name="onScroll">滚动位置变化回调</param>
+        /// <param name="alwaysShowVertical">是否总是显示垂直滚动条</param>
+        /// <param name="alwaysShowHorizontal">是否总是显示水平滚动条</param>
+        /// <param name="style">样式</param>
+        /// <param name="children">子元素</param>
+        public ScrollRect(BoxSkin boxSkin, Vector2 scrollPosition,
+                         System.Action<Vector2> onScroll = null,
+                         bool alwaysShowVertical = false, bool alwaysShowHorizontal = false,
+                         IDeclStyle style = null,
                          params IElement[] children)
         {
             Key = null;
@@ -79,6 +107,7 @@ namespace DeclGUI.Components
             OnScroll = onScroll;
             AlwaysShowVertical = alwaysShowVertical;
             AlwaysShowHorizontal = alwaysShowHorizontal;
+            _boxSkin = boxSkin;
 
             if (children != null && children.Length > 0)
             {
@@ -102,7 +131,7 @@ namespace DeclGUI.Components
         public ScrollRect(Vector2 scrollPosition, IDeclStyle style,
                          System.Action<Vector2> onScroll = null,
                          bool alwaysShowVertical = false, bool alwaysShowHorizontal = false,
-                         params IElement[] children) : this(scrollPosition, onScroll, alwaysShowVertical, alwaysShowHorizontal, style, children)
+                         params IElement[] children) : this(BoxSkin.Auto, scrollPosition, onScroll, alwaysShowVertical, alwaysShowHorizontal, style, children)
        {
        }
 
@@ -118,6 +147,23 @@ namespace DeclGUI.Components
         public ScrollRect(Vector2 scrollPosition, IEnumerable<IElement> children,
                          System.Action<Vector2> onScroll = null,
                          bool alwaysShowVertical = false, bool alwaysShowHorizontal = false,
+                         IDeclStyle style = null) : this(BoxSkin.Auto, scrollPosition, children, onScroll, alwaysShowVertical, alwaysShowHorizontal, style)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤和集合
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="scrollPosition">滚动位置</param>
+        /// <param name="children">子元素集合</param>
+        /// <param name="onScroll">滚动位置变化回调</param>
+        /// <param name="alwaysShowVertical">是否总是显示垂直滚动条</param>
+        /// <param name="alwaysShowHorizontal">是否总是显示水平滚动条</param>
+        /// <param name="style">样式</param>
+        public ScrollRect(BoxSkin boxSkin, Vector2 scrollPosition, IEnumerable<IElement> children,
+                         System.Action<Vector2> onScroll = null,
+                         bool alwaysShowVertical = false, bool alwaysShowHorizontal = false,
                          IDeclStyle style = null)
         {
             Key = null;
@@ -130,6 +176,7 @@ namespace DeclGUI.Components
             OnScroll = onScroll;
             AlwaysShowVertical = alwaysShowVertical;
             AlwaysShowHorizontal = alwaysShowHorizontal;
+            _boxSkin = boxSkin;
 
             if (children != null)
             {
@@ -216,7 +263,27 @@ namespace DeclGUI.Components
         /// <returns>带样式的滚动视图容器</returns>
         public ScrollRect WithStyle(IDeclStyle style)
         {
-            return new ScrollRect(ScrollPosition, OnScroll, AlwaysShowVertical, AlwaysShowHorizontal, style, GetElementsArray());
+            return new ScrollRect(_boxSkin, ScrollPosition, OnScroll, AlwaysShowVertical, AlwaysShowHorizontal, style, GetElementsArray());
+        }
+        
+        /// <summary>
+        /// 设置盒模型皮肤样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <returns>带有新盒模型皮肤的ScrollRect实例</returns>
+        public ScrollRect WithBoxSkin(BoxSkin boxSkin)
+        {
+            return new ScrollRect(boxSkin, ScrollPosition, OnScroll, AlwaysShowVertical, AlwaysShowHorizontal, Style, GetElementsArray());
+        }
+
+        /// <summary>
+        /// IStylefulElement 接口实现 - 设置样式
+        /// </summary>
+        /// <param name="style">新样式</param>
+        /// <returns>带样式的元素</returns>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
         }
 
         /// <summary>
@@ -227,7 +294,7 @@ namespace DeclGUI.Components
         /// <returns>带新设置的滚动视图容器</returns>
         public ScrollRect WithScrollbars(bool showVertical, bool showHorizontal)
         {
-            return new ScrollRect(ScrollPosition, OnScroll, showVertical, showHorizontal, Style, GetElementsArray());
+            return new ScrollRect(_boxSkin, ScrollPosition, OnScroll, showVertical, showHorizontal, Style, GetElementsArray());
         }
         
         /// <summary>

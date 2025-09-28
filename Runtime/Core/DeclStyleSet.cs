@@ -195,6 +195,28 @@ namespace DeclGUI.Core
                 return hash;
             }
         }
+        
+        public int GetContentHashCode(DeclTheme theme)
+        {
+            unchecked
+            {
+                int hash = 17;
+                // 使用包含主题属性值的哈希计算
+                hash = hash * 23 + (_baseStyle.GetContentHashCode(theme));
+                // 对于样式集，我们还需要考虑伪类样式
+                foreach (var kv in _styles.Dictionary)
+                {
+                    hash = hash * 23 + kv.Key.GetHashCode();
+                    hash = hash * 23 + kv.Value.GetContentHashCode(theme);
+                }
+                hash = hash * 23 + (_hasTransition.GetHashCode());
+                if (_hasTransition)
+                {
+                    hash = hash * 23 + _serializedTransition.GetHashCode();
+                }
+                return hash;
+            }
+        }
 
         Color? IDeclStyle.Color {
             get => _baseStyle.Color.IsDirectValue ? _baseStyle.Color.DirectValue : (_baseStyle.Color.IsPropertyRef ? _baseStyle.Color.GetValue(DeclThemeManager.CurrentTheme) : (Color?)null);

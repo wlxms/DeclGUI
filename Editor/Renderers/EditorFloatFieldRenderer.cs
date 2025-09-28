@@ -59,12 +59,25 @@ namespace DeclGUI.Editor.Renderers
                 var style = editorMgr.ApplyStyle(styleParam ?? element.Style, EditorStyles.numberField);
                 var width = editorMgr.GetStyleWidth(styleParam ?? element.Style);
 
-                // 渲染浮点数字段
-                var newValue = EditorGUILayout.FloatField(
-                    element.Value,
-                    style,
-                    GUILayout.Width(width > 0 ? width : 100)
-                );
+                var newValue = element.Value;
+
+                if (width > 0)
+                {
+                    // 渲染浮点数字段
+                    newValue = EditorGUILayout.FloatField(
+                        element.Value,
+                        style,
+                        GUILayout.Width(width)
+                    );
+                }
+                else
+                {
+                    // 渲染浮点数字段
+                    newValue = EditorGUILayout.FloatField(
+                        element.Value,
+                        style
+                    );
+                }
 
                 // 检查值是否变化并触发回调
                 if (!Mathf.Approximately(newValue, element.Value) && element.OnValueChanged != null)

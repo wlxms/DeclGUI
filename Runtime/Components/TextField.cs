@@ -99,5 +99,24 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IStylefulElement 显式实现，返回 IStylefulElement
+        /// </summary>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
+        /// 便于链式调用的 WithStyle，返回 TextField 类型
+        /// </summary>
+        public TextField WithStyle(IDeclStyle style)
+        {
+            var newField = new TextField(Value, OnValueChanged, style);
+            newField.Key = Key;
+            newField.Events = Events;
+            return newField;
+        }
     }
 }

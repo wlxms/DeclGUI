@@ -16,11 +16,21 @@ namespace DeclGUI.Components
         private IElement[] _elements;
         private int _count;
         private int _capacity;
+        private BoxSkin _boxSkin;
 
         /// <summary>
         /// 布局样式
         /// </summary>
         public IDeclStyle Style { get; }
+        
+        /// <summary>
+        /// 盒模型皮肤样式
+        /// </summary>
+        public BoxSkin BoxSkin
+        {
+            get => _boxSkin;
+            private set => _boxSkin = value;
+        }
         
         /// <summary>
         /// 事件注册结构
@@ -36,7 +46,16 @@ namespace DeclGUI.Components
         /// 构造函数 - 使用参数数组
         /// </summary>
         /// <param name="children">子元素</param>
-        public Hor(params IElement[] children)
+        public Hor(params IElement[] children) : this(BoxSkin.Auto, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素</param>
+        public Hor(BoxSkin boxSkin, params IElement[] children)
         {
             Key = null;
             _elements = null;
@@ -44,6 +63,7 @@ namespace DeclGUI.Components
             _capacity = 0;
             Style = null;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null && children.Length > 0)
             {
@@ -60,7 +80,17 @@ namespace DeclGUI.Components
         /// </summary>
         /// <param name="style">样式</param>
         /// <param name="children">子元素</param>
-        public Hor(IDeclStyle style, params IElement[] children) : this(children)
+        public Hor(IDeclStyle style, params IElement[] children) : this(BoxSkin.Auto, style, children)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、样式和参数数组
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="style">样式</param>
+        /// <param name="children">子元素</param>
+        public Hor(BoxSkin boxSkin, IDeclStyle style, params IElement[] children) : this(boxSkin, children)
         {
             Style = style;
         }
@@ -70,7 +100,17 @@ namespace DeclGUI.Components
         /// </summary>
         /// <param name="children">子元素集合</param>
         /// <param name="style">样式</param>
-        public Hor(IEnumerable<IElement> children, IDeclStyle style = null)
+        public Hor(IEnumerable<IElement> children, IDeclStyle style = null) : this(BoxSkin.Auto, children, style)
+        {
+        }
+        
+        /// <summary>
+        /// 构造函数 - 使用盒模型皮肤、集合和样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <param name="children">子元素集合</param>
+        /// <param name="style">样式</param>
+        public Hor(BoxSkin boxSkin, IEnumerable<IElement> children, IDeclStyle style = null)
         {
             Key = null;
             _elements = null;
@@ -78,6 +118,7 @@ namespace DeclGUI.Components
             _capacity = 0;
             Style = style;
             Events = new DeclEvent();
+            _boxSkin = boxSkin;
 
             if (children != null)
             {
@@ -199,5 +240,50 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+        /// <summary>
+        /// IStylefulElement 显式实现，返回 IStylefulElement
+        /// </summary>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
+        /// 便于链式调用的 WithStyle，返回 Hor 类型
+        /// </summary>
+        public Hor WithStyle(IDeclStyle style)
+        {
+            var newHor = new Hor(_boxSkin, style);
+            newHor.Key = Key;
+            newHor.Events = Events;
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newHor.Add(_elements[i]);
+                }
+            }
+            return newHor;
+        }
+        
+        /// <summary>
+        /// 设置盒模型皮肤样式
+        /// </summary>
+        /// <param name="boxSkin">盒模型皮肤样式</param>
+        /// <returns>带有新盒模型皮肤的Hor实例</returns>
+        public Hor WithBoxSkin(BoxSkin boxSkin)
+        {
+            var newHor = new Hor(boxSkin, Style);
+            newHor.Key = Key;
+            newHor.Events = Events;
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newHor.Add(_elements[i]);
+                }
+            }
+            return newHor;
+        }
     }
 }

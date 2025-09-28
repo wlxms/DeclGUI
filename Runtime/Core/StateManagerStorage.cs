@@ -14,7 +14,19 @@ namespace DeclGUI.Core
         
         public IStateManager CurrentStateManager => _currentStateManager;
         public IReadOnlyDictionary<string, IStateManagerStorage> ChildStateManagers => _childStateManagers;
-        
+
+        private Action<IElementState> _elementStateCreatedHandler;
+
+        public Action<IElementState> OnElementStateCreated
+        {
+            get => _elementStateCreatedHandler;
+            set
+            {
+                _elementStateCreatedHandler = value;
+                _currentStateManager?.SetElementStateInitializer(value);
+            }
+        }
+
         public StateManagerStorage(IStateManager currentStateManager)
         {
             _currentStateManager = currentStateManager ?? throw new ArgumentNullException(nameof(currentStateManager));
@@ -27,11 +39,12 @@ namespace DeclGUI.Core
                 
             if (createStateManager == null)
                 throw new ArgumentNullException(nameof(createStateManager));
-                
+
             if (!_childStateManagers.TryGetValue(key, out var stateManager))
             {
                 stateManager = createStateManager();
                 _childStateManagers[key] = stateManager;
+                stateManager.OnElementStateCreated += OnElementStateCreated;
             }
             return stateManager;
         }

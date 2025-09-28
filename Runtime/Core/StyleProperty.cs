@@ -95,6 +95,57 @@ namespace DeclGUI.Core
         }
 
         /// <summary>
+        /// 获取基于内容值的哈希码（用于缓存键生成）
+        /// </summary>
+        public int GetContentHashCode()
+        {
+            int hash = 17;
+            hash = hash * 31 + _valueType.GetHashCode();
+            if (_valueType == PropertyValueType.Direct && _directValue != null)
+            {
+                // 对于直接值，计算实际内容的哈希码
+                if (_directValue is RectOffset rectOffset)
+                {
+                    // 特殊处理RectOffset，基于其内部值计算哈希码
+                    hash = hash * 31 + CalculateRectOffsetContentHashCode(rectOffset);
+                }
+                else if (_directValue is UnityEngine.Object unityObject)
+                {
+                    // Unity对象使用实例ID
+                    hash = hash * 31 + unityObject.GetInstanceID();
+                }
+                else
+                {
+                    // 其他类型使用默认哈希码计算
+                    hash = hash * 31 + _directValue.GetHashCode();
+                }
+            }
+            else if (_valueType == PropertyValueType.PropertyRef && _propertyRef != null)
+            {
+                // 对于属性引用，使用引用字符串的哈希码
+                hash = hash * 31 + _propertyRef.GetHashCode();
+            }
+            return hash;
+        }
+
+        /// <summary>
+        /// 计算RectOffset的内容哈希码，基于其内部值而不是引用
+        /// </summary>
+        private int CalculateRectOffsetContentHashCode(RectOffset rectOffset)
+        {
+            if (rectOffset == null) return 0;
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + rectOffset.left.GetHashCode();
+                hash = hash * 23 + rectOffset.right.GetHashCode();
+                hash = hash * 23 + rectOffset.top.GetHashCode();
+                hash = hash * 23 + rectOffset.bottom.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <summary>
         /// 获取直接值的哈希码，特别处理某些类型以确保值变化时哈希码也会变化
         /// </summary>
         private int GetDirectValueHashCode(T value)

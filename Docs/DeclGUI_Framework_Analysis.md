@@ -28,9 +28,13 @@ DeclGUI
 │       ├── TextField.cs - 文本输入框
 │       ├── Slider.cs - 滑动条
 │       ├── StatefulButton.cs - 有状态按钮
-│       ├── LongPressButton.cs - 长按钮
+│       ├── LongPressButton.cs - 长按按钮
 │       ├── Spc.cs - 间距组件
-│       └── ObjectField.cs - 对象选择字段
+│       ├── ObjectField.cs - 对象选择字段
+│       ├── DisableContext.cs - 禁用上下文
+│       ├── DisableGroup.cs - 禁用组
+│       ├── Panel.cs - 面板组件 (Advanced)
+│       └── 其他组件文件
 └── Editor (编辑器实现)
     ├── Renderers (具体渲染器)
     │   ├── EditorLabelRenderer.cs - 标签渲染器
@@ -139,7 +143,7 @@ public interface IContainerElement<TState> : IContainerElement, IElement<TState>
 - `Runtime/Components/ObjectField.cs` - 对象选择字段
 - `Runtime/Components/ContextBatch.cs` - 批量上下文容器
 - `Runtime/Components/ContextConsumer.cs` - 上下文消费者
-- `Runtime/Components/ReadOnly.cs` - 只读上下文
+- `Runtime/Components/DisableContext.cs` - 禁用上下文
 - `Runtime/Components/UserName.cs` - 用户名上下文
 - `Runtime/Components/ECanvas.cs` - 编辑器画布组件
 - `Runtime/Components/AbsolutePanel.cs` - 绝对定位面板组件
@@ -157,6 +161,8 @@ public interface IContainerElement<TState> : IContainerElement, IElement<TState>
 - `Runtime/Components/Vector2Field.cs` - Vector2输入字段组件
 - `Runtime/Components/Vector3Field.cs` - Vector3输入字段组件
 - `Runtime/Components/Vector4Field.cs` - Vector4输入字段组件
+- `Runtime/Components/DisableGroup.cs` - 禁用组组件
+- `Runtime/Components/Advanced/Panel.cs` - 面板组件
 
 ### 编辑器渲染器文件
 - `Editor/Renderers/EditorLabelRenderer.cs` - 标签渲染器
@@ -318,12 +324,12 @@ ContextBatch 机制借鉴了 React Context 的设计理念，为声明式 UI 提
 
 #### 1. 上下文提供者 (IContextProvider)
 ```csharp
-public struct ReadOnly : IContextProvider
+public struct DisableContext : IContextProvider
 {
     public bool Value { get; }
     public IElement Child { get; }
     
-    public ReadOnly(bool value, IElement child)
+    public DisableContext(bool value, IElement child)
     {
         Value = value;
         Child = child;
@@ -363,16 +369,16 @@ public struct ContextBatch : IContextProvider, IElement, IEnumerable<IElement>
 ```csharp
 // 提供多个上下文
 new ContextBatch(
-    new ReadOnly(true, childElement),
+    new DisableContext(true, childElement),
     new UserName("John", childElement)
 )
 
 // 消费上下文
 new ContextConsumer(context => {
-    bool isReadOnly = context.Get<ReadOnly>().Value;
+    bool isDisabled = context.Get<DisableContext>().Value;
     string userName = context.Get<UserName>().Value;
     
-    return new Label($"Hello {userName}, ReadOnly: {isReadOnly}");
+    return new Label($"Hello {userName}, Disabled: {isDisabled}");
 })
 ```
 

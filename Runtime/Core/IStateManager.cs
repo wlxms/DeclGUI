@@ -48,5 +48,17 @@ namespace DeclGUI.Core
         /// </summary>
         /// <param name="framesToKeep">保留的帧数</param>
         void CleanupUnusedStates(int framesToKeep = 2);
+        
+        /// <summary>
+        /// 设置元素状态初始化器
+        /// </summary>
+        /// <param name="initializer">元素状态初始化器</param>
+        void SetElementStateInitializer(Action<IElementState> initializer);
+        
+        /// <summary>
+        /// 获取元素状态初始化器
+        /// </summary>
+        /// <returns>元素状态初始化器</returns>
+        Action<IElementState> GetElementStateInitializer();
     }
 }

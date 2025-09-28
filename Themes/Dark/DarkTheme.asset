@@ -93,6 +93,8 @@ MonoBehaviour:
     StyleSet: {fileID: 11400000, guid: 3f7cd38c69807f6498305788f2382e69, type: 2}
   - Id: Quote
     StyleSet: {fileID: 11400000, guid: 6205fbb1308bd6f49a1572e414e34003, type: 2}
+  - Id: FoldoutGroup
+    StyleSet: {fileID: 11400000, guid: 10032b983d052064b8c548fb8137d282, type: 2}
   themeProperties:
   - Name: backgroundColor
     Type: 2
@@ -196,7 +198,7 @@ MonoBehaviour:
     Type: 2
     FloatValue: 0
     IntValue: 0
-    ColorValue: {r: 0.25, g: 0.25, b: 0.25, a: 1}
+    ColorValue: {r: 1, g: 1, b: 1, a: 1}
     StringValue: 
     BoolValue: 0
     Vector2Value: {x: 0, y: 0}
@@ -440,11 +442,25 @@ MonoBehaviour:
     Vector2Value: {x: 0, y: 0}
     Vector3Value: {x: 0, y: 0, z: 0}
     RectOffsetValue:
+      m_Left: 1
+      m_Right: 1
+      m_Top: 1
+      m_Bottom: 1
+  - Name: marginNormal
+    Type: 7
+    FloatValue: 0
+    IntValue: 0
+    ColorValue: {r: 0, g: 0, b: 0, a: 0}
+    StringValue: 
+    BoolValue: 0
+    Vector2Value: {x: 0, y: 0}
+    Vector3Value: {x: 0, y: 0, z: 0}
+    RectOffsetValue:
       m_Left: 2
       m_Right: 2
       m_Top: 2
       m_Bottom: 2
-  - Name: marginNormal
+  - Name: marginLarge
     Type: 7
     FloatValue: 0
     IntValue: 0
@@ -458,20 +474,6 @@ MonoBehaviour:
       m_Right: 4
       m_Top: 4
       m_Bottom: 4
-  - Name: marginLarge
-    Type: 7
-    FloatValue: 0
-    IntValue: 0
-    ColorValue: {r: 0, g: 0, b: 0, a: 0}
-    StringValue: 
-    BoolValue: 0
-    Vector2Value: {x: 0, y: 0}
-    Vector3Value: {x: 0, y: 0, z: 0}
-    RectOffsetValue:
-      m_Left: 8
-      m_Right: 8
-      m_Top: 8
-      m_Bottom: 8
   - Name: paddingHeading
     Type: 7
     FloatValue: 0

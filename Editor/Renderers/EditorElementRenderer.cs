@@ -6,11 +6,41 @@ using UnityEditor;
 
 namespace DeclGUI.Editor.Renderers
 {
+    public struct RenderWithBackgroundColor : IDisposable
+    {
+        private readonly Color _originalBackgroundColor;
+
+        public RenderWithBackgroundColor(Color backgroundColor)
+        {
+            _originalBackgroundColor = GUI.backgroundColor;
+            GUI.backgroundColor = backgroundColor;
+        }
+
+        public void Dispose()
+        {
+            GUI.backgroundColor = _originalBackgroundColor;
+        }
+    }
+    public struct RenderWithColor : IDisposable
+    {
+        private readonly Color _originalColor;
+
+        public RenderWithColor(Color color)
+        {
+            _originalColor = GUI.color;
+            GUI.color = color;
+        }
+
+        public void Dispose()
+        {
+            GUI.color = _originalColor;
+        }
+    }
     public abstract class EditorElementRenderer : IElementRenderer, IElementRectProvider
     {
         public abstract Vector2 CalculateSize(RenderManager mgr, in IElement element, in IDeclStyle style);
         public abstract void Render(RenderManager mgr, in IElement element, in IDeclStyle style);
-        
+
         /// <summary>
         /// 获取元素的屏幕区域
         /// 默认实现返回空矩形，子类需要重写此方法提供具体的位置信息
@@ -66,6 +96,16 @@ namespace DeclGUI.Editor.Renderers
         {
             EditorRenderManager.RenderFallbackStatic(exception, element);
         }
+
+        protected IDisposable RenderWithBackgroundColor(Color backgroundColor)
+        {
+            return new RenderWithBackgroundColor(backgroundColor);
+        }
+        protected IDisposable RenderWithColor(Color color)
+        {
+            return new RenderWithColor(color);
+        }
+
     }
 
     /// <summary>
@@ -135,5 +175,6 @@ namespace DeclGUI.Editor.Renderers
         {
             throw new InvalidOperationException($"Stateful element {typeof(TElement).Name} requires state parameter. Use Render(RenderManager, TElement, TState) instead.");
         }
+        
     }
 }

@@ -70,5 +70,24 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IStylefulElement 显式实现，返回 IStylefulElement
+        /// </summary>
+        IStylefulElement IStylefulElement.WithStyle(IDeclStyle style)
+        {
+            return WithStyle(style);
+        }
+
+        /// <summary>
+        /// 便于链式调用的 WithStyle，返回 Label 类型
+        /// </summary>
+        public Label WithStyle(IDeclStyle style)
+        {
+            var newLabel = new Label(Text, style);
+            newLabel.Key = Key;
+            newLabel.Events = Events;
+            return newLabel;
+        }
     }
 }

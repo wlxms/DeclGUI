@@ -28,7 +28,7 @@ namespace DeclGUI.Editor.Renderers
 
             // 保存当前GUI enabled状态
             bool originalGUIEnabled = GUI.enabled;
-            
+
             // 在只读状态下禁用GUI
             GUI.enabled = !isReadOnly;
 
@@ -44,15 +44,16 @@ namespace DeclGUI.Editor.Renderers
 
                 // 获取泛型参数类型
                 var objectType = elementType.GetGenericArguments()[0];
-                
+
                 // 使用反射获取字段值
                 var valueProperty = elementType.GetProperty("Value");
                 var onValueChangedProperty = elementType.GetProperty("OnValueChanged");
                 var allowSceneObjectsProperty = elementType.GetProperty("AllowSceneObjects");
                 var styleProperty = elementType.GetProperty("Style");
+                var labelProperty = elementType.GetProperty("Label");
 
                 if (valueProperty == null || onValueChangedProperty == null ||
-                    allowSceneObjectsProperty == null || styleProperty == null)
+                    allowSceneObjectsProperty == null || styleProperty == null || labelProperty == null)
                 {
                     Debug.LogError("无法访问ObjectField的属性");
                     return;
@@ -62,31 +63,66 @@ namespace DeclGUI.Editor.Renderers
                 var onValueChangedDelegate = onValueChangedProperty.GetValue(element);
                 bool allowSceneObjects = (bool)allowSceneObjectsProperty.GetValue(element);
                 DeclStyle style = (DeclStyle)styleProperty.GetValue(element);
+                string label = (string)labelProperty.GetValue(element);
 
                 // 应用样式
                 var editorMgr = mgr as EditorRenderManager;
                 if (editorMgr == null)
                     return;
-                    
+
                 var currentStyle = styleParam ?? style;
                 var guiStyle = editorMgr.ApplyStyle(currentStyle, EditorStyles.label);
                 var width = editorMgr.GetStyleWidth(currentStyle);
-                
+
                 // 渲染对象选择器
-                var newValue = EditorGUILayout.ObjectField(
-                    GUIContent.none,
-                    currentValue as UnityEngine.Object,
-                    objectType,
-                    allowSceneObjects,
-                    GUILayout.Width(width > 0 ? width : 200)
-                );
-                
+                UnityEngine.Object newValue = null;
+                try
+                {
+                    if (width > 0)
+                    {
+                        newValue = EditorGUILayout.ObjectField(
+                                                string.IsNullOrEmpty(label) ? GUIContent.none : new GUIContent(label),
+                                                currentValue as UnityEngine.Object,
+                                                objectType,
+                                                allowSceneObjects,
+                                                GUILayout.Width(width)
+                                            );
+                    }
+                    else
+                    {
+                        newValue = EditorGUILayout.ObjectField(
+                                                string.IsNullOrEmpty(label) ? GUIContent.none : new GUIContent(label),
+                                                currentValue as UnityEngine.Object,
+                                                objectType,
+                                                allowSceneObjects
+                                            );
+                    }
+
+                }
+                catch (UnityEngine.ExitGUIException)
+                {
+                    // 忽略ExitGUIException，这是Unity GUI系统的正常行为
+                    return;
+                }
+                catch (System.Exception ex)
+                {
+                    Debug.LogError($"ObjectField渲染错误: {ex.Message}");
+                    return;
+                }
+
                 // 检查值是否变化并触发回调
                 if (!Equals(newValue, currentValue) && onValueChangedDelegate != null)
                 {
-                    // 使用反射调用回调
-                    var method = onValueChangedDelegate.GetType().GetMethod("Invoke");
-                    method?.Invoke(onValueChangedDelegate, new[] { newValue });
+                    try
+                    {
+                        // 使用反射调用回调
+                        var method = onValueChangedDelegate.GetType().GetMethod("Invoke");
+                        method?.Invoke(onValueChangedDelegate, new[] { newValue });
+                    }
+                    catch (System.Exception ex)
+                    {
+                        Debug.LogError($"ObjectField回调错误: {ex.Message}");
+                    }
                 }
             }
             finally
@@ -108,13 +144,13 @@ namespace DeclGUI.Editor.Renderers
             // 获取样式宽度
             var width = editorMgr.GetStyleWidth(style);
             var height = editorMgr.GetStyleHeight(style);
-            
+
             // 如果设置了固定尺寸，使用固定尺寸
             if (width > 0 && height > 0)
             {
                 return new Vector2(width, height);
             }
-            
+
             // 对于ObjectField，使用默认的200像素宽度和标准高度
             return new Vector2(width > 0 ? width : 200, EditorGUIUtility.singleLineHeight);
         }
