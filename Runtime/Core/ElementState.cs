@@ -155,6 +155,7 @@ namespace DeclGUI.Core
         /// </summary>
         public object State { get; set; }
         
+        
         /// <summary>
         /// 当前元素状态标志（组合状态）
         /// </summary>

@@ -341,8 +341,8 @@ MonoBehaviour:
     RectOffsetValue:
       m_Left: 4
       m_Right: 4
-      m_Top: 4
-      m_Bottom: 4
+      m_Top: 1
+      m_Bottom: 1
   - Name: paddingNormal
     Type: 7
     Description: "\u6807\u51C6\u5185\u8FB9\u8DDD"
@@ -356,8 +356,8 @@ MonoBehaviour:
     RectOffsetValue:
       m_Left: 8
       m_Right: 8
-      m_Top: 8
-      m_Bottom: 8
+      m_Top: 2
+      m_Bottom: 2
   - Name: paddingLarge
     Type: 7
     Description: "\u5927\u5185\u8FB9\u8DDD"
@@ -371,8 +371,8 @@ MonoBehaviour:
     RectOffsetValue:
       m_Left: 12
       m_Right: 12
-      m_Top: 12
-      m_Bottom: 12
+      m_Top: 4
+      m_Bottom: 4
   - Name: marginSmall
     Type: 7
     Description: "\u5C0F\u5916\u8FB9\u8DDD"

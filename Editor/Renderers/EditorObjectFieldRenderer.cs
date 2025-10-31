@@ -34,36 +34,19 @@ namespace DeclGUI.Editor.Renderers
 
             try
             {
-                // 使用反射来处理泛型ObjectField
-                var elementType = element.GetType();
-                if (!elementType.IsGenericType || elementType.GetGenericTypeDefinition() != typeof(ObjectField<>))
+                // 使用接口来处理ObjectField，避免反射
+                if (element is not IObjectField objectField)
                 {
-                    Debug.LogError($"EditorObjectFieldRenderer只能渲染ObjectField<>组件，但收到: {elementType.Name}");
+                    Debug.LogError($"EditorObjectFieldRenderer只能渲染IObjectField组件，但收到: {element.GetType().Name}");
                     return;
                 }
 
-                // 获取泛型参数类型
-                var objectType = elementType.GetGenericArguments()[0];
-
-                // 使用反射获取字段值
-                var valueProperty = elementType.GetProperty("Value");
-                var onValueChangedProperty = elementType.GetProperty("OnValueChanged");
-                var allowSceneObjectsProperty = elementType.GetProperty("AllowSceneObjects");
-                var styleProperty = elementType.GetProperty("Style");
-                var labelProperty = elementType.GetProperty("Label");
-
-                if (valueProperty == null || onValueChangedProperty == null ||
-                    allowSceneObjectsProperty == null || styleProperty == null || labelProperty == null)
-                {
-                    Debug.LogError("无法访问ObjectField的属性");
-                    return;
-                }
-
-                object currentValue = valueProperty.GetValue(element);
-                var onValueChangedDelegate = onValueChangedProperty.GetValue(element);
-                bool allowSceneObjects = (bool)allowSceneObjectsProperty.GetValue(element);
-                DeclStyle style = (DeclStyle)styleProperty.GetValue(element);
-                string label = (string)labelProperty.GetValue(element);
+                // 通过接口获取属性值
+                var currentValue = objectField.Value;
+                var objectType = objectField.ObjectType;
+                bool allowSceneObjects = objectField.AllowSceneObjects;
+                var style = objectField.Style;
+                string label = objectField.Label;
 
                 // 应用样式
                 var editorMgr = mgr as EditorRenderManager;
@@ -111,13 +94,12 @@ namespace DeclGUI.Editor.Renderers
                 }
 
                 // 检查值是否变化并触发回调
-                if (!Equals(newValue, currentValue) && onValueChangedDelegate != null)
+                if (!Equals(newValue, currentValue))
                 {
                     try
                     {
-                        // 使用反射调用回调
-                        var method = onValueChangedDelegate.GetType().GetMethod("Invoke");
-                        method?.Invoke(onValueChangedDelegate, new[] { newValue });
+                        // 使用接口方法通知值变化
+                        objectField.NotifyChanged(newValue);
                     }
                     catch (System.Exception ex)
                     {

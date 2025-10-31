@@ -72,7 +72,7 @@ namespace DeclGUI.Editor.Renderers
                 }
                 else
                 {
-                    var newValue = GUILayout.TextField(currentValue, style);
+                    var newValue = GUILayout.TextField(currentValue, style, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true));
                     CheckValueChanged(element, currentValue, newValue);
                 }
             }
@@ -107,33 +107,38 @@ namespace DeclGUI.Editor.Renderers
             var width = editorMgr.GetStyleWidth(currentStyle);
             var height = editorMgr.GetStyleHeight(currentStyle);
 
-            // 如果设置了固定尺寸，直接返回
+            // 使用 Unity 的标准方法计算文本字段尺寸
+            var content = new GUIContent(element.Value ?? "");
+            Vector2 totalSize;
+            
             if (width > 0 && height > 0)
             {
-                return new Vector2(width, height);
+                // 如果设置了固定宽度和高度，直接使用
+                totalSize = new Vector2(width, height);
             }
-
-            // 计算文本字段的大小
-            Vector2 textSize = CalculateTextSize(element.Value ?? "", guiStyle, width > 0 ? width : 0);
-            
-            // 添加文本字段的padding和border
-            if (guiStyle != null)
+            else if (width > 0)
             {
-                textSize.x += guiStyle.padding.left + guiStyle.padding.right;
-                textSize.y += guiStyle.padding.top + guiStyle.padding.bottom;
-                textSize.x += guiStyle.border.left + guiStyle.border.right;
-                textSize.y += guiStyle.border.top + guiStyle.border.bottom;
-                
-                // 确保至少有最小尺寸
-                textSize.x = Mathf.Max(textSize.x, guiStyle.fixedWidth > 0 ? guiStyle.fixedWidth : 0);
-                textSize.y = Mathf.Max(textSize.y, guiStyle.fixedHeight > 0 ? guiStyle.fixedHeight : 0);
+                // 如果设置了固定宽度，计算自适应高度
+                totalSize = new Vector2(width, guiStyle.CalcHeight(content, width));
+            }
+            else if (height > 0)
+            {
+                // 如果设置了固定高度，计算自适应宽度
+                totalSize = new Vector2(guiStyle.CalcSize(content).x, height);
+            }
+            else
+            {
+                // 完全自适应尺寸
+                totalSize = guiStyle.CalcSize(content);
             }
 
-            // 应用尺寸约束
-            if (width > 0) textSize.x = width;
-            if (height > 0) textSize.y = height;
+            // 确保至少有最小尺寸
+            if (guiStyle.fixedWidth > 0)
+                totalSize.x = Mathf.Max(totalSize.x, guiStyle.fixedWidth);
+            if (guiStyle.fixedHeight > 0)
+                totalSize.y = Mathf.Max(totalSize.y, guiStyle.fixedHeight);
 
-            return textSize;
+            return totalSize;
         }
     }
 }

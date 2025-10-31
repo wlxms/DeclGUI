@@ -89,9 +89,9 @@ namespace DeclGUI.Editor.Renderers
                 // 恢复原始GUI enabled状态
                 GUI.enabled = originalGUIEnabled;
             }
-            // 记录渲染时间
-            float timeEndRender = Time.time;
-            float timeCostRender = timeEndRender - timeStartRender;
+            // // 记录渲染时间
+            // float timeEndRender = Time.time;
+            // float timeCostRender = timeEndRender - timeStartRender;
 
         }
         public override Vector2 CalculateSize(RenderManager mgr, in Button element, in IDeclStyle style)
@@ -105,33 +105,39 @@ namespace DeclGUI.Editor.Renderers
             var width = editorMgr.GetStyleWidth(currentStyle);
             var height = editorMgr.GetStyleHeight(currentStyle);
 
-            // 如果设置了固定尺寸，直接返回
+            // 使用 Unity 的标准方法计算按钮尺寸
+            var content = new GUIContent(element.Text);
+            Vector2 totalSize;
+            
             if (width > 0 && height > 0)
             {
-                return new Vector2(width, height);
+                // 如果设置了固定宽度和高度，直接使用
+                totalSize = new Vector2(width, height);
             }
-
-            // 计算文本内容大小
-            Vector2 textSize = CalculateTextSize(element.Text, guiStyle, width > 0 ? width : 0);
-
-            // 添加按钮的padding和border
-            Vector2 totalSize = textSize;
-            if (guiStyle != null)
+            else if (width > 0)
             {
-                totalSize.x += guiStyle.padding.left + guiStyle.padding.right;
-                totalSize.y += guiStyle.padding.top + guiStyle.padding.bottom;
-
-                totalSize.x += guiStyle.border.left + guiStyle.border.right;
-                totalSize.y += guiStyle.border.top + guiStyle.border.bottom;
-
-                // 确保至少有最小尺寸
-                totalSize.x = Mathf.Max(totalSize.x, guiStyle.fixedWidth > 0 ? guiStyle.fixedWidth : 0);
-                totalSize.y = Mathf.Max(totalSize.y, guiStyle.fixedHeight > 0 ? guiStyle.fixedHeight : 0);
+                // 如果设置了固定宽度，计算自适应高度
+                totalSize = new Vector2(width, guiStyle.CalcHeight(content, width));
+            }
+            else if (height > 0)
+            {
+                // 如果设置了固定高度，计算自适应宽度
+                totalSize = new Vector2(guiStyle.CalcSize(content).x, height);
+            }
+            else
+            {
+                // 完全自适应尺寸
+                totalSize = guiStyle.CalcSize(content);
             }
 
-            // 应用尺寸约束
-            if (width > 0) totalSize.x = width;
-            if (height > 0) totalSize.y = height;
+            // 确保至少有最小尺寸
+            if (guiStyle.fixedWidth > 0)
+                totalSize.x = Mathf.Max(totalSize.x, guiStyle.fixedWidth);
+            if (guiStyle.fixedHeight > 0)
+                totalSize.y = Mathf.Max(totalSize.y, guiStyle.fixedHeight);
+
+            // if (editorMgr.IsCalculating<ComposedPopupMenu>())
+            //     Debug.LogError($"Button元素计算大小，padding: {guiStyle.padding}, margin: {guiStyle.margin}, 宽度: {totalSize.x}, 高度: {totalSize.y}");
 
             return totalSize;
         }

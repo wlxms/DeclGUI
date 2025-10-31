@@ -9,7 +9,7 @@ namespace DeclGUI.Components
     /// 原子化的对象选择控件，只负责选择和显示Unity对象引用
     /// </summary>
     /// <typeparam name="T">对象类型</typeparam>
-    public struct ObjectField<T> : IElement, IStylefulElement where T : UnityEngine.Object
+    public struct ObjectField<T> : IObjectField where T : UnityEngine.Object
     {
         /// <summary>
         /// 元素唯一标识符
@@ -105,13 +105,41 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 当前对象引用
+        /// </summary>
+        UnityEngine.Object IObjectField.Value => Value;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 对象类型
+        /// </summary>
+        Type IObjectField.ObjectType => typeof(T);
+
+        /// <summary>
+        /// IObjectField 接口实现 - 是否允许场景对象
+        /// </summary>
+        bool IObjectField.AllowSceneObjects => AllowSceneObjects;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 标签文本
+        /// </summary>
+        string IObjectField.Label => Label;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 通知对象值变化
+        /// </summary>
+        void IObjectField.NotifyChanged(UnityEngine.Object newValue)
+        {
+            OnValueChanged?.Invoke(newValue as T);
+        }
     }
 
     /// <summary>
     /// 非泛型版本的对象字段组件
     /// 支持传入 Type 类型
     /// </summary>
-    public struct ObjectField : IElement, IStylefulElement
+    public struct ObjectField : IObjectField
     {
         /// <summary>
         /// 元素唯一标识符
@@ -217,6 +245,34 @@ namespace DeclGUI.Components
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 当前对象引用
+        /// </summary>
+        UnityEngine.Object IObjectField.Value => Value;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 对象类型
+        /// </summary>
+        Type IObjectField.ObjectType => ObjectType;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 是否允许场景对象
+        /// </summary>
+        bool IObjectField.AllowSceneObjects => AllowSceneObjects;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 标签文本
+        /// </summary>
+        string IObjectField.Label => Label;
+
+        /// <summary>
+        /// IObjectField 接口实现 - 通知对象值变化
+        /// </summary>
+        void IObjectField.NotifyChanged(UnityEngine.Object newValue)
+        {
+            OnValueChanged?.Invoke(newValue);
+        }
     }
 
 }

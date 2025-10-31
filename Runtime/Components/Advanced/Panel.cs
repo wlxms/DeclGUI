@@ -31,6 +31,7 @@ namespace DeclGUI.Components.Advanced
             var newPanel = new Panel(_boxSkin, style, _elements?.Take(_count).ToArray() ?? Array.Empty<IElement>());
             newPanel.Key = Key;
             newPanel.Events = Events;
+            newPanel._contextParams = _contextParams;
             return newPanel;
         }
         public string Key { get; set; }
@@ -38,12 +39,13 @@ namespace DeclGUI.Components.Advanced
         private int _count;
         private int _capacity;
         private BoxSkin _boxSkin;
+        private IContextProvider[] _contextParams;
 
         /// <summary>
         /// Panel样式
         /// </summary>
         public IDeclStyle Style { get; }
-        
+
         /// <summary>
         /// 盒模型皮肤样式
         /// </summary>
@@ -64,13 +66,18 @@ namespace DeclGUI.Components.Advanced
         public int Count => _count;
 
         /// <summary>
+        /// 上下文参数列表
+        /// </summary>
+        public IReadOnlyList<IContextProvider> ContextParams => _contextParams ?? Array.Empty<IContextProvider>();
+
+        /// <summary>
         /// 构造函数 - 使用参数数组
         /// </summary>
         /// <param name="children">子元素</param>
         public Panel(params IElement[] children) : this(BoxSkin.Auto, children)
         {
         }
-        
+
         /// <summary>
         /// 构造函数 - 使用盒模型皮肤和参数数组
         /// </summary>
@@ -85,6 +92,7 @@ namespace DeclGUI.Components.Advanced
             Style = null;
             Events = new DeclEvent();
             _boxSkin = boxSkin;
+            _contextParams = null;
 
             if (children != null && children.Length > 0)
             {
@@ -104,7 +112,7 @@ namespace DeclGUI.Components.Advanced
         public Panel(IDeclStyle style, params IElement[] children) : this(BoxSkin.Auto, style, children)
         {
         }
-        
+
         /// <summary>
         /// 构造函数 - 使用盒模型皮肤、样式和参数数组
         /// </summary>
@@ -124,7 +132,7 @@ namespace DeclGUI.Components.Advanced
         public Panel(IEnumerable<IElement> children, IDeclStyle style = null) : this(BoxSkin.Auto, children, style)
         {
         }
-        
+
         /// <summary>
         /// 构造函数 - 使用盒模型皮肤、集合和样式
         /// </summary>
@@ -140,6 +148,7 @@ namespace DeclGUI.Components.Advanced
             Style = style;
             Events = new DeclEvent();
             _boxSkin = boxSkin;
+            _contextParams = null;
 
             if (children != null)
             {
@@ -170,7 +179,7 @@ namespace DeclGUI.Components.Advanced
         {
             // 使用DefaultPanel样式，如果用户没有提供自定义样式
             var panelStyle = Style ?? GetDefaultPanelStyle();
-            
+
             // 创建基于Ver布局的Panel
             return new Ver(panelStyle, _elements?.Take(_count).ToArray() ?? Array.Empty<IElement>());
         }
@@ -211,7 +220,7 @@ namespace DeclGUI.Components.Advanced
         {
             ArrayPoolHelper.Dispose(ref _elements, ref _capacity, ref _count);
         }
-        
+
         /// <summary>
         /// 绑定事件处理程序
         /// </summary>
@@ -223,7 +232,7 @@ namespace DeclGUI.Components.Advanced
             events.SetHandler(eventType, handler);
             Events = events;
         }
-        
+
         /// <summary>
         /// 解绑事件处理程序
         /// </summary>
@@ -234,7 +243,7 @@ namespace DeclGUI.Components.Advanced
             events.SetHandler(eventType, null);
             Events = events;
         }
-        
+
         /// <summary>
         /// 设置盒模型皮肤样式
         /// </summary>
@@ -245,6 +254,28 @@ namespace DeclGUI.Components.Advanced
             var newPanel = new Panel(boxSkin, Style);
             newPanel.Key = Key;
             newPanel.Events = Events;
+            newPanel._contextParams = _contextParams;
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newPanel.Add(_elements[i]);
+                }
+            }
+            return newPanel;
+        }
+
+        /// <summary>
+        /// 添加上下文参数
+        /// </summary>
+        /// <param name="contextParams">上下文参数</param>
+        /// <returns>带有上下文参数的新容器实例</returns>
+        IContainerElement IContainerElement.WithContext(params IContextProvider[] contextParams)
+        {
+            var newPanel = new Panel(_boxSkin, Style);
+            newPanel.Key = Key;
+            newPanel.Events = Events;
+            newPanel._contextParams = contextParams?.Where(c => c != null).ToArray();
             if (_count > 0 && _elements != null)
             {
                 for (int i = 0; i < _count; i++)
@@ -259,5 +290,34 @@ namespace DeclGUI.Components.Advanced
         /// IStylefulElement 接口实现
         /// </summary>
         IDeclStyle IStylefulElement.Style => Style;
+
+        /// <summary>
+        /// 添加上下文参数
+        /// </summary>
+        /// <param name="contextParams">上下文参数</param>
+        /// <returns>带有上下文参数的新容器实例</returns>
+        public Panel WithContext(params IContextProvider[] contextParams)
+        {
+            var newPanel = new Panel(_boxSkin, Style);
+            newPanel.Key = Key;
+            newPanel.Events = Events;
+            newPanel._contextParams = contextParams?.Where(c => c != null).ToArray();
+            if (_count > 0 && _elements != null)
+            {
+                for (int i = 0; i < _count; i++)
+                {
+                    newPanel.Add(_elements[i]);
+                }
+            }
+            return newPanel;
+        }
+
+
+        /// <summary>
+        /// 按索引获取子元素
+        /// </summary>
+        /// <param name="index">子元素索引</param>
+        /// <returns>子元素</returns>
+        public IElement this[int index] => _elements[index];
     }
 }
